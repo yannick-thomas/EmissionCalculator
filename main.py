@@ -217,13 +217,13 @@ class CalcApp(customtkinter.CTk):
         )
         self.emissions_formula.grid(row=4 ,columnspan=6,column=0, padx=(20, 0), pady=(0, 0), sticky="nw")
         self.emissions_equals = customtkinter.CTkLabel(self.main_content, text="=")
-        self.emissions_equals.grid(row=4,columnspan=6, column=0, padx=(0, 30), pady=(0, 0), sticky="ne")
+        self.emissions_equals.grid(row=4,columnspan=6, column=2, padx=(50, 0), pady=(0, 0), sticky="nw")
         self.emissions_result = customtkinter.CTkLabel(
             self.main_content,
             text=str(round(self.emissions, 2)).replace(".", ",") + "t CO2",
             font=customtkinter.CTkFont(size=14, weight="bold")
         )
-        self.emissions_result.grid(row=5,columnspan=6, column=3, padx=(0, 10), pady=(0, 0), sticky="ne")
+        self.emissions_result.grid(row=4,columnspan=6, column=3, padx=(0, 10), pady=(0, 0), sticky="ne")
 
 
 
