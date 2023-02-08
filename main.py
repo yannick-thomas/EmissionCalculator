@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter
-import sys
-import math
+
 
 
 class CalcApp(customtkinter.CTk):
@@ -189,6 +188,10 @@ class CalcApp(customtkinter.CTk):
             self.emissions_formula.grid_forget()
             self.emissions_equals.grid_forget()
             self.emissions_result.grid_forget()
+            self.emission_component_heading.grid_forget()
+            self.emission_component_formula.grid_forget()
+            self.emission_component_equals.grid_forget()
+            self.emission_component_result_label.grid_forget()
 
         if (not self.is_valid_calc):
             self.label_calc_failure.grid_forget()
@@ -223,9 +226,34 @@ class CalcApp(customtkinter.CTk):
             text=str(round(self.emissions, 2)).replace(".", ",") + "t CO2",
             font=customtkinter.CTkFont(size=14, weight="bold")
         )
-        self.emissions_result.grid(row=4,columnspan=6, column=3, padx=(0, 10), pady=(0, 0), sticky="ne")
-
-
+        self.emissions_result.grid(row=4,columnspan=6, column=3, padx=(10, 0), pady=(0, 0), sticky="ne")
+        self.emission_component_heading = customtkinter.CTkLabel(
+            self.main_content, 
+            text="Preisbestandteil CO2 Kosten (inkl. Umsatzsteuer):",
+            font=customtkinter.CTkFont(size=16),
+            text_color="grey"
+        )
+        self.emission_component_heading.grid(row=5, columnspan= 6, column=0, padx=(20, 0), pady=(20, 0), sticky="nw")
+        self.emission_component_formula = customtkinter.CTkLabel(
+            self.main_content,
+            text= str(round(self.emissions, 2)).replace(".", ",") + "t CO2 x 30€/t CO2 x 1,12 MwSt.",
+            font=customtkinter.CTkFont(size=14, weight="bold")
+        )
+        self.emission_component_formula.grid(row=6, columnspan=6, column=0, padx=(20, 0), pady=(0, 460), sticky="nw")
+        self.emission_component_equals = customtkinter.CTkLabel(
+            self.main_content,
+            text="="
+        )
+        self.emission_component_equals.grid(row=6,columnspan=6, column=2, padx=(50, 0), pady=(0, 0), sticky="nw")
+        self.emissions = round(self.emissions, 2)
+        self.emission_component_result = self.emissions * 30 * 1.19
+        self.emission_component_result = round(self.emission_component_result, 2)
+        self.emission_component_result_label = customtkinter.CTkLabel(
+            self.main_content,
+            text=str(self.emission_component_result) + "€",
+            font=customtkinter.CTkFont(size=14, weight="bold")
+        )
+        self.emission_component_result_label.grid(row=6, columnspan=6, column=3, padx=(0, 20), pady=(0, 0), sticky="ne")
 
 if __name__ == "__main__":
     app = CalcApp()
