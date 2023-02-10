@@ -140,13 +140,13 @@ class BriquettesRenderer(Renderer):
             text=str(round(result[1], 2)).replace(".", ",") + "t CO2"
         )
         self.price_comp_co2_costs_formula.configure(
-            text=str(result[2]).replace(".", ",") + "Kg CO2 x 30€/ CO2 t x 1,19", 
+            text=str(round(result[1], 2)).replace(".", ",") + "t CO2 x 30€/ CO2 t x 1,19", 
         )
         self.result_co2_costs_label.configure(
             text=str(round(result[2], 2)).replace(".", ",") + " €",
         )
         self.energy_content_formula.configure(
-            text="19,0 GJ x 1 x " + self.quantity.get()
+            text="19,0 GJ x 1 x " + self.quantity.get() + "t"
         )
         self.result_energy_content_label.configure(
             text=str(result[3]).replace(".", ",") + " GJ"
