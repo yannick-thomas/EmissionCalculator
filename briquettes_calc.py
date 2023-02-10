@@ -10,8 +10,11 @@ class BriquettesCalculation(Calculation):
             )
             emission_component_result =  emissions * 30 * 1.19
             energy_content = 19 * 1 * float(self.quantity.replace(",", "."))
-            result.append(emissions, emission_component_result, energy_content)
+            result.append(True)
+            result.append(emissions) 
+            result.append(emission_component_result) 
+            result.append(energy_content)
         except:
-            result.append('Fehler')
+            result.append(False)
         return result
         

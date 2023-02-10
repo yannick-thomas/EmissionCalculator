@@ -7,9 +7,10 @@ class OilCalculation(Calculation):
         try:
             emissions = 42.8 * 0.074 * 0.845 * float(self.quantity.replace(",", "."))
             emission_component_result = emissions * 30 * 1.19
+            result.append(True)
             result.append(emissions)
             result.append(emission_component_result)
         except:
-            return
+            result.append(False)
         return result
         
