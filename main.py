@@ -11,8 +11,6 @@ class CalcApp(customtkinter.CTk):
     WIDTH = 980
     HEIGHT = 720
 
-    CURRENT_PAGE = ''
-
     def __init__(self):
         super().__init__()
 
@@ -20,9 +18,6 @@ class CalcApp(customtkinter.CTk):
         self.delivery_quantity_oil = tk.StringVar(self)
         self.result_briquettes = 0
         self.is_valid_calc = False
-
-        if (self.CURRENT_PAGE == "briquettes"):
-            self.main_content.destroy()
 
         # Window configuration
         self.title("Emissionsrechner")
@@ -54,9 +49,6 @@ class CalcApp(customtkinter.CTk):
     def calc_heating_oil(self):
         oil_renderer = OilRenderer(self)
         oil_renderer.build_base()
-        
-
-
 
 if __name__ == "__main__":
     app = CalcApp()
