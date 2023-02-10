@@ -6,7 +6,7 @@ from renderer import Renderer
 from oil_calc import OilCalculation
 
 class OilRenderer(Renderer):
-    is_valid_calc = True
+    is_valid_calc = ''
 
     def build_base(self):
         self.quantity = tk.StringVar(self.window)
@@ -40,22 +40,11 @@ class OilRenderer(Renderer):
             command=self.calc
         )
         calc_button_oil.grid(row=2, column=5, padx=(20, 0), pady=(20, 0))
-        emissions_heading_label = customtkinter.CTkLabel(
-            self.main_content,
-            font=customtkinter.CTkFont(size=16),
-            text_color="grey"
-        )
-        emissions_heading_label.grid(row=3,columnspan=3, column=0 ,padx=(20, 0), pady=(30, 0), sticky="nw")
-        emissions_formula = customtkinter.CTkLabel(
-            self.main_content,
-            font=customtkinter.CTkFont(size=14, weight="bold")
-        )
-        emissions_formula.grid(row=4 ,columnspan=6,column=0, padx=(20, 0), pady=(0, 0), sticky="nw")
         self.label_calc_failure = customtkinter.CTkLabel(
-            self.main_content, 
+            self.main_content,
+            text = "Fehler!",
             font=customtkinter.CTkFont(size=16, weight="bold")
         )
-        self.label_calc_failure.grid(row=3, column=1, padx=(100, 0), pady=(30, 0), sticky="nw")
         self.window.bind('<Return>', lambda event: self.calc())
 
         
@@ -65,60 +54,69 @@ class OilRenderer(Renderer):
         self.render_post_calculation(result)
 
     def render_post_calculation(self, result):
+        if not result[0]:
+            if not self.is_valid_calc == '':
+                self.emissions_heading_label.grid_forget()
+                self.emissions_formula.grid_forget()
+                self.emissions_equals.grid_forget()
+                self.emissions_result.grid_forget()
+                self.emission_component_heading.grid_forget()
+                self.emission_component_formula.grid_forget()
+                self.emission_component_equals.grid_forget()
+                self.emission_component_result_label.grid_forget()
+                self.label_calc_failure.grid_forget()
+            self.label_calc_failure.grid(row=3, column=1, padx=(100, 0), pady=(30, 0), sticky="nw")
+            self.is_valid_calc = False
+            return
 
-        emissions_heading_label.grid_forget()
-        emissions_formula.grid_forget()
-        emissions_equals.grid_forget()
-        emissions_result.grid_forget()
-        emission_component_heading.grid_forget()
-        emission_component_formula.grid_forget()
-        emission_component_equals.grid_forget()
-        emission_component_result_label.grid_forget()
-        self.label_calc_failure.grid_forget()
+        if self.is_valid_calc != True:
+            self.emissions_heading_label = customtkinter.CTkLabel(
+                self.main_content,
+                text="Brennstroffemissionen der Heizöllieferung:",
+                font=customtkinter.CTkFont(size=16),
+                text_color="grey"
+            )
+            self.emissions_formula = customtkinter.CTkLabel(
+                self.main_content,
+                font=customtkinter.CTkFont(size=14, weight="bold")
+            )
+            self.emissions_equals = customtkinter.CTkLabel(self.main_content, text="=")
+            self.emissions_result = customtkinter.CTkLabel(
+                self.main_content,
+                font=customtkinter.CTkFont(size=14, weight="bold")
+            )
+            self.emission_component_heading = customtkinter.CTkLabel(
+                self.main_content, 
+                text="Preisbestandteil CO2 Kosten (inkl. Umsatzsteuer):",
+                font=customtkinter.CTkFont(size=16),
+                text_color="grey"
+            )
+            self.emission_component_formula = customtkinter.CTkLabel(
+                self.main_content,
+                font=customtkinter.CTkFont(size=14, weight="bold")
+            )
+            self.emission_component_equals = customtkinter.CTkLabel(
+                self.main_content,
+                text="="
+            )
+            self.emission_component_result_label = customtkinter.CTkLabel(
+                self.main_content,
+                font=customtkinter.CTkFont(size=14, weight="bold")
+            )
 
-        emissions_heading_label = customtkinter.CTkLabel(
-            self.main_content,
-            text="Brennstroffemissionen der Heizöllieferung:",
-            font=customtkinter.CTkFont(size=16),
-            text_color="grey"
-        )
-        emissions_heading_label.grid(row=3,columnspan=3, column=0 ,padx=(20, 0), pady=(30, 0), sticky="nw")
-        emissions_formula = customtkinter.CTkLabel(
-            self.main_content,
-            text="42,8 GJ/t x 0,074 t CO2/GJ x 0,845t/1000l x " + self.quantity.get()+ "l", 
-            font=customtkinter.CTkFont(size=14, weight="bold")
-        )
-        emissions_formula.grid(row=4 ,columnspan=6,column=0, padx=(20, 0), pady=(0, 0), sticky="nw")
-        emissions_equals = customtkinter.CTkLabel(self.main_content, text="=")
-        emissions_equals.grid(row=4,columnspan=6, column=2, padx=(50, 0), pady=(0, 0), sticky="nw")
-        emissions_result = customtkinter.CTkLabel(
-            self.main_content,
-            text=str(round(result[0], 2)).replace(".", ",") + "t CO2",
-            font=customtkinter.CTkFont(size=14, weight="bold")
-        )
-        emissions_result.grid(row=4,columnspan=6, column=3, padx=(10, 0), pady=(0, 0), sticky="ne")
-        emission_component_heading = customtkinter.CTkLabel(
-            self.main_content, 
-            text="Preisbestandteil CO2 Kosten (inkl. Umsatzsteuer):",
-            font=customtkinter.CTkFont(size=16),
-            text_color="grey"
-        )
-        emission_component_heading.grid(row=5, columnspan= 6, column=0, padx=(20, 0), pady=(20, 0), sticky="nw")
-        emission_component_formula = customtkinter.CTkLabel(
-            self.main_content,
-            text= str(round(result[0], 2)).replace(".", ",") + "t CO2 x 30€/t CO2 x 1,12 MwSt.",
-            font=customtkinter.CTkFont(size=14, weight="bold")
-        )
-        emission_component_formula.grid(row=6, columnspan=6, column=0, padx=(20, 0), pady=(0, 460), sticky="nw")
-        emission_component_equals = customtkinter.CTkLabel(
-            self.main_content,
-            text="="
-        )
-        emission_component_equals.grid(row=6,columnspan=6, column=2, padx=(50, 0), pady=(0, 0), sticky="nw")
+
+        self.emissions_formula.configure(text = "42,8 GJ/t x 0,074 t CO2/GJ x 0,845t/1000l x " + self.quantity.get()+ "l")
+        self.emissions_result.configure(text = str(round(result[1], 2)).replace(".", ",") + "t CO2")
+        self.emission_component_formula.configure(text = str(round(result[1], 2)).replace(".", ",") + "t CO2 x 30€/t CO2 x 1,12 MwSt.")
+        self.emission_component_result_label.configure(text = str(round(result[2], 2)) + "€")
+        
+        self.emissions_heading_label.grid(row=3,columnspan=3, column=0 ,padx=(20, 0), pady=(30, 0), sticky="nw")
+        self.emissions_formula.grid(row=4 ,columnspan=6,column=0, padx=(20, 0), pady=(0, 0), sticky="nw")
+        self.emissions_equals.grid(row=4,columnspan=6, column=2, padx=(50, 0), pady=(0, 0), sticky="nw")
+        self.emissions_result.grid(row=4,columnspan=6, column=3, padx=(10, 0), pady=(0, 0), sticky="ne")
+        self.emission_component_heading.grid(row=5, columnspan= 6, column=0, padx=(20, 0), pady=(20, 0), sticky="nw")
+        self.emission_component_formula.grid(row=6, columnspan=6, column=0, padx=(20, 0), pady=(0, 460), sticky="nw")
+        self.emission_component_equals.grid(row=6,columnspan=6, column=2, padx=(50, 0), pady=(0, 0), sticky="nw")
         # emissions = round(RESULT[0], 2)
-        emission_component_result_label = customtkinter.CTkLabel(
-            self.main_content,
-            text=str(round(result[1], 2)) + "€",
-            font=customtkinter.CTkFont(size=14, weight="bold")
-        )
-        emission_component_result_label.grid(row=6, columnspan=6, column=3, padx=(0, 20), pady=(0, 0), sticky="ne")
+        self.emission_component_result_label.grid(row=6, columnspan=6, column=3, padx=(0, 20), pady=(0, 0), sticky="ne")
+        self.is_valid_calc = True
