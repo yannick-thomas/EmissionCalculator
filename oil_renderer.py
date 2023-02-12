@@ -55,6 +55,7 @@ class OilRenderer(Renderer):
         self.render_post_calculation(result)
 
     def render_post_calculation(self, result):
+        print(result)
         if not result[0]:
             if not self.is_valid_calc == '':
                 self.emissions_heading_label.grid_forget()

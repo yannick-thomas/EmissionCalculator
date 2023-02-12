@@ -132,6 +132,12 @@ class BriquettesRenderer(Renderer):
                 self.main_content,
                 font=customtkinter.CTkFont(size=14, weight="bold")
             )
+            self.button_print = customtkinter.CTkButton(
+                self.main_content,
+                text="Drucken",
+                command="",
+                font=customtkinter.CTkFont(size=14, weight="bold")
+            )
 
         self.fuel_emission_calc_formula.configure(
             text="19,0 GJ/t x 0,0992t CO2 / GJ x 1 x " + self.quantity.get() + "t", 
@@ -164,5 +170,6 @@ class BriquettesRenderer(Renderer):
         self.energy_content_label.grid(row=6,columnspan=3, column=0, padx=(20, 0), pady=(40, 0), sticky="nw")
         self.energy_content_formula.grid(row=6,columnspan=3, column=0, padx=(20, 0), pady=(65, 0), sticky="nw")
         self.result_energy_content_label.grid(row=6,columnspan=3, column=3, padx=(20, 0), pady=(65, 0), sticky="nw")
+        self.button_print.grid(row=6,columnspan=3, column=1, padx=(50, 0), pady=(120, 0), sticky="nw")
 
         self.is_valid_calc = True
