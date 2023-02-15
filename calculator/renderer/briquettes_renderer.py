@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import customtkinter
 
-from renderer import Renderer
-from briquettes_calc import BriquettesCalculation
+from calculator.renderer.renderer import Renderer
+from calculator.calc.briquettes_calc import BriquettesCalculation
 
 class BriquettesRenderer(Renderer):
     is_valid_calc = ''
