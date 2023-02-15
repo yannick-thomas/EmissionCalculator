@@ -5,6 +5,7 @@ import re
 
 from renderer import Renderer
 from oil_calc import OilCalculation
+from print_handler import PrintHandler
 
 class OilRenderer(Renderer):
     is_valid_calc = ''
@@ -54,8 +55,14 @@ class OilRenderer(Renderer):
         result = calculation.calculate()
         self.render_post_calculation(result)
 
+
+
     def render_post_calculation(self, result):
-        print(result)
+
+        def print_label():
+            handler = PrintHandler(result)
+            handler.print_result()
+        
         if not result[0]:
             if not self.is_valid_calc == '':
                 self.emissions_heading_label.grid_forget()
@@ -125,6 +132,12 @@ class OilRenderer(Renderer):
                 self.main_content,
                 font=customtkinter.CTkFont(size=14, weight="bold")
             )
+            self.button_print = customtkinter.CTkButton(
+                self.main_content,
+                text="Drucken",
+                command=print_label,
+                font=customtkinter.CTkFont(size=14, weight="bold")
+            )
 
         self.emissions_formula.configure(text = "42,8 GJ/t x 0,074 t CO2/GJ x 0,845t/1000l x " + self.quantity.get()+ "l")
         self.emissions_result.configure(text = str(result[1]).replace(".", ",") + "kg CO2")
@@ -145,4 +158,6 @@ class OilRenderer(Renderer):
         self.energy_component_formula.grid(row=6, columnspan= 6, column=0, padx=(20, 0), pady=(80, 0), sticky="nw")
         self.energy_component_equals.grid(row=6,columnspan=6, column=2, padx=(80, 0), pady=(80, 0), sticky="nw")
         self.energy_component_result_label.grid(row=6, columnspan=6, column=3, padx=(120, 0), pady=(80, 0), sticky="nw")
+        self.button_print.grid(row=6,columnspan=3, column=1, padx=(50, 0), pady=(120, 0), sticky="nw")
+
         self.is_valid_calc = True
