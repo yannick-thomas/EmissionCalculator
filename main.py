@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import customtkinter
 
-from oil_renderer import OilRenderer
-from briquettes_renderer import BriquettesRenderer
+from calculator.renderer.oil_renderer import OilRenderer
+from calculator.renderer.briquettes_renderer import BriquettesRenderer
 
 
 class CalcApp(customtkinter.CTk):

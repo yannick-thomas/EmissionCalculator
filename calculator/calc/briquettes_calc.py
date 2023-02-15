@@ -1,4 +1,4 @@
-from calculation import Calculation
+from calculator.calc.calculation import Calculation
 
 class BriquettesCalculation(Calculation):
 

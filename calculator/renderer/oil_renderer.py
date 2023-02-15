@@ -3,9 +3,9 @@ from tkinter import ttk
 import customtkinter
 import re
 
-from renderer import Renderer
-from oil_calc import OilCalculation
-from print_handler import PrintHandler
+from calculator.renderer.renderer import Renderer
+from calculator.calc.oil_calc import OilCalculation
+from calculator.misc.print_handler import PrintHandler
 
 class OilRenderer(Renderer):
     is_valid_calc = ''

@@ -8,7 +8,7 @@ class PrintHandler():
         self.results = results
 
     def build_template(self): 
-        environment = Environment(loader=FileSystemLoader("."))
+        environment = Environment(loader=FileSystemLoader("../../templates/print_template.html"))
         template = environment.get_template("print_template.html")
 
         return template.render(
