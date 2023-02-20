@@ -68,6 +68,7 @@ class BriquettesRenderer(Renderer):
                 self.energy_content_equals.grid_forget()
                 self.energy_content_label.grid_forget()
                 self.result_energy_content_label.grid_forget()
+                self.button_print.grid_forget()
                 self.label_calc_failure.grid_forget()
             self.label_calc_failure.grid(row=3, column=1, padx=(100, 0), pady=(30, 0), sticky="nw")
             self.is_valid_calc = False

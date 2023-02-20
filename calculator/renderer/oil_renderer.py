@@ -75,6 +75,9 @@ class OilRenderer(Renderer):
                 self.emission_component_result_label.grid_forget()
                 self.energy_component_heading.grid_forget()
                 self.energy_component_formula.grid_forget()
+                self.energy_component_equals.grid_forget()
+                self.energy_component_result_label.grid_forget()
+                self.button_print.grid_forget()
                 self.label_calc_failure.grid_forget()
             self.label_calc_failure.grid(row=3, column=1, padx=(100, 0), pady=(30, 0), sticky="nw")
             self.is_valid_calc = False
