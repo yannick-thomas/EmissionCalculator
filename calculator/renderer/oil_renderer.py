@@ -52,15 +52,12 @@ class OilRenderer(Renderer):
         
     def calc(self):
         calculation = OilCalculation(self.quantity.get())
-        result = calculation.calculate()
-        self.render_post_calculation(result)
-
-
+        self.result = calculation.calculate()
+        self.render_post_calculation(self.result)
 
     def render_post_calculation(self, result):
-
         def print_label():
-            handler = PrintHandler(result)
+            handler = PrintHandler(self.result)
             handler.print_result()
         
         if not result[0]:

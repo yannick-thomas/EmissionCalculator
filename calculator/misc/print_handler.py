@@ -1,6 +1,8 @@
 from xhtml2pdf import pisa
 import subprocess
 from jinja2 import Environment, FileSystemLoader
+import re
+
 
 class PrintHandler():
     
@@ -13,7 +15,7 @@ class PrintHandler():
 
         return template.render(
             emission_component_result = str(self.results[2]).replace(".", ","),
-            emissions = self.results[1],
+            emissions = re.sub(r'(?<!^)(?=(\d{3})+,)', r'.',str(format(self.results[1], '.2f')).replace(".", ",")),
             energy_content = self.results[3]
         )
     

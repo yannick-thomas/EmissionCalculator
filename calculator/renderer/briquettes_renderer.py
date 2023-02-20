@@ -4,6 +4,7 @@ import customtkinter
 
 from calculator.renderer.renderer import Renderer
 from calculator.calc.briquettes_calc import BriquettesCalculation
+from calculator.misc.print_handler import PrintHandler
 
 class BriquettesRenderer(Renderer):
     is_valid_calc = ''
@@ -50,10 +51,15 @@ class BriquettesRenderer(Renderer):
         
     def calc(self):
         calculation = BriquettesCalculation(self.quantity.get())
-        result = calculation.calculate()
-        self.render_post_calculation(result)
+        self.result = calculation.calculate()
+        self.render_post_calculation(self.result)
 
     def render_post_calculation(self, result):
+
+        def print_label():
+            handler = PrintHandler(self.result)
+            handler.print_result()
+
         if not result[0]:
             if not self.is_valid_calc == '':
                 self.fuel_emission_calc_label.grid_forget()
@@ -136,7 +142,7 @@ class BriquettesRenderer(Renderer):
             self.button_print = customtkinter.CTkButton(
                 self.main_content,
                 text="Drucken",
-                command="",
+                command=print_label,
                 font=customtkinter.CTkFont(size=14, weight="bold")
             )
 
