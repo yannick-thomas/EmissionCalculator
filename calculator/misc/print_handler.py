@@ -8,18 +8,18 @@ class PrintHandler():
         self.results = results
 
     def build_template(self): 
-        environment = Environment(loader=FileSystemLoader("../../templates/print_template.html"))
+        environment = Environment(loader=FileSystemLoader("templates/"))
         template = environment.get_template("print_template.html")
 
         return template.render(
-            emission_component_result = self.results[2],
+            emission_component_result = str(self.results[2]).replace(".", ","),
             emissions = self.results[1],
             energy_content = self.results[3]
         )
     
     def convert_template(self):
         with open("label.pdf", "w+b") as output_file:
-            pisa.CreatePDF(self.build_template(), dest=output_file, pagesize=(210, 298))
+            pisa.CreatePDF(self.build_template(), dest=output_file, pagesize=(210, 203))
 
     def print_result(self):
         self.convert_template()
