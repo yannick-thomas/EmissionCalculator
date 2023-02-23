@@ -1,4 +1,4 @@
 jinja2
 xhtml2pdf
 customtkinter
-tkinter
+tk
