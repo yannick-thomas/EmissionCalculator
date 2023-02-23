@@ -1,11 +1,11 @@
 from xhtml2pdf import pisa
-import subprocess
+import os
 from jinja2 import Environment, FileSystemLoader
 import re
 
 
 class PrintHandler():
-    
+
     def __init__(self, results : list) -> None:
         self.results = results
 
@@ -18,11 +18,11 @@ class PrintHandler():
             emissions = re.sub(r'(?<!^)(?=(\d{3})+,)', r'.',str(format(self.results[1], '.2f')).replace(".", ",")),
             energy_content = self.results[3]
         )
-    
+
     def convert_template(self):
         with open("label.pdf", "w+b") as output_file:
             pisa.CreatePDF(self.build_template(), dest=output_file, pagesize=(210, 203))
 
     def print_result(self):
         self.convert_template()
-        subprocess.call(['rundll32','shimgvw.dll,ImageView_PrintTo', 'label.pdf'])
+        os.startfile("label.pdf")
