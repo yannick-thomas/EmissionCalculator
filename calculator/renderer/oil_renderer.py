@@ -12,7 +12,8 @@ class OilRenderer(Renderer):
 
     def build_base(self):
         self.quantity = tk.StringVar(self.window)
-        self.main_content = customtkinter.CTkFrame(self.window, corner_radius=0, fg_color="#232323")
+        # self.main_content = customtkinter.CTkFrame(self.window, corner_radius=0, fg_color="#232323")
+        self.main_content = customtkinter.CTkFrame(self.window, corner_radius=0)
         self.main_content.grid(row=0, column=1, rowspan=5, sticky="nsew")
         self.main_content.grid_rowconfigure(5, weight=1)
         main_content_heading = customtkinter.CTkLabel(
