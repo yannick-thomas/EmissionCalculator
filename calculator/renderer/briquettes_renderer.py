@@ -11,7 +11,8 @@ class BriquettesRenderer(Renderer):
 
     def build_base(self):
         self.quantity = tk.StringVar(self.window)
-        self.main_content = customtkinter.CTkFrame(self.window, corner_radius=0, fg_color="#232323")
+        # self.main_content = customtkinter.CTkFrame(self.window, corner_radius=0, fg_color="#232323")
+        self.main_content = customtkinter.CTkFrame(self.window, corner_radius=0)
         self.main_content.grid(row=0, column=1, rowspan=5, sticky="nsew")
         self.main_content.grid_rowconfigure(5, weight=1)
         main_content_heading = customtkinter.CTkLabel(
@@ -89,7 +90,6 @@ class BriquettesRenderer(Renderer):
             )
             self.fuel_emission_calc_formula = customtkinter.CTkLabel(
                 self.main_content,
-                text_color="white", 
                 font=customtkinter.CTkFont(size=14, weight="bold")
             )
             self.fuel_emission_calc_equals = customtkinter.CTkLabel(
