@@ -1,2 +1,5 @@
 __pycache__/
 label.pdf
+build/
+dist/
+main.spec
