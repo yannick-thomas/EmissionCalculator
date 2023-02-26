@@ -13,7 +13,7 @@ import tempfile
 class PrintHandler():
 
     def __init__(self, results : list) -> None:
-        self.tempfile_path = os.path.join(os.getcwd(), "label.pdf")
+        self.tempfile_path = os.path.join(tempfile.gettempdir(), "label.pdf")
         self.results = results
 
     def build_template(self): 
@@ -40,7 +40,7 @@ class PrintHandler():
         """)
 
         return template.render(
-            emission_component_result = str(self.results[2]).replace(".", ","),
+            emission_component_result = str(round(self.results[2], 2)).replace(".", ","),
             emissions = re.sub(r'(?<!^)(?=(\d{3})+,)', r'.',str(format(self.results[1], '.2f')).replace(".", ",")),
             energy_content = self.results[3]
         )
