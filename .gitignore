@@ -3,3 +3,4 @@ label.pdf
 build/
 dist/
 main.spec
+installer.exe
