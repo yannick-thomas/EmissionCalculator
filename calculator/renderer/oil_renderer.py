@@ -19,7 +19,8 @@ class OilRenderer(Renderer):
         main_content_heading = customtkinter.CTkLabel(
             self.main_content, 
             text="Emissionsberechnung für Heizöl", 
-            font=customtkinter.CTkFont(size=20, weight="bold")
+            font=customtkinter.CTkFont(size=20, weight="bold"),
+            text_color=self.font_color
         )
         main_content_heading.grid(row=1, column=0, padx=(20, 0), pady=(20, 0), columnspan=4, sticky="nw")
         label_quantity_oil= customtkinter.CTkLabel(self.main_content, text="Liefermenge:", font=customtkinter.CTkFont(size=16))
@@ -28,25 +29,31 @@ class OilRenderer(Renderer):
             self.main_content, 
             width=70, 
             font=customtkinter.CTkFont(size=12, weight="bold"), 
-            textvariable=self.quantity
+            textvariable=self.quantity,
+            text_color=self.font_color
         )
         entry_quantity_oil.grid(row=2, column=1, padx=(155, 0), pady=(20, 0), sticky="nw")
         label_quantity_measure = customtkinter.CTkLabel(
             self.main_content, text="l", 
-            font=customtkinter.CTkFont(size=16, weight="bold")
+            font=customtkinter.CTkFont(size=16, weight="bold"),
+            text_color=self.font_color
         )
         label_quantity_measure.grid(row=2, column=2, padx=(2, 0), pady=(20, 0), sticky="nw")
         calc_button_oil = customtkinter.CTkButton(
             self.main_content, 
             text="Berechnen", 
             width=120, 
-            command=self.calc
+            command=self.calc,
+            fg_color=self.button_color,
+            text_color=self.font_color,
+            hover_color=self.hover_color
         )
         calc_button_oil.grid(row=2, column=5, padx=(20, 0), pady=(20, 0))
         self.label_calc_failure = customtkinter.CTkLabel(
             self.main_content,
             text = "Fehler!",
-            font=customtkinter.CTkFont(size=16, weight="bold")
+            font=customtkinter.CTkFont(size=16, weight="bold"),
+            text_color=self.font_color
         )
         self.window.bind('<Return>', lambda event: self.calc())
 
@@ -86,58 +93,69 @@ class OilRenderer(Renderer):
                 self.main_content,
                 text="Brennstroffemissionen der Heizöllieferung:",
                 font=customtkinter.CTkFont(size=16),
-                text_color="grey"
+                text_color=self.header_color
             )
             self.emissions_formula = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.emissions_equals = customtkinter.CTkLabel(self.main_content, text="=")
             self.emissions_result = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.emission_component_heading = customtkinter.CTkLabel(
                 self.main_content, 
                 text="Preisbestandteil CO2 Kosten (inkl. Umsatzsteuer):",
                 font=customtkinter.CTkFont(size=16),
-                text_color="grey"
+                text_color=self.header_color
             )
             self.emission_component_formula = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.emission_component_equals = customtkinter.CTkLabel(
                 self.main_content,
-                text="="
+                text="=",
+                text_color=self.formula_color
             )
             self.emission_component_result_label = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.energy_component_heading = customtkinter.CTkLabel(
                 self.main_content,
                 text="Energiegehalt der Heizöllieferung:",
                 font=customtkinter.CTkFont(size=16),
-                text_color="grey"
+                text_color=self.header_color
             )
             self.energy_component_formula = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.energy_component_equals = customtkinter.CTkLabel(
                 self.main_content,
-                text="="
+                text="=",
+                text_color=self.formula_color
             )
             self.energy_component_result_label = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.button_print = customtkinter.CTkButton(
                 self.main_content,
                 text="Drucken",
                 command=print_label,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                fg_color=self.button_color,
+                hover_color=self.hover_color,
+                text_color=self.font_color
             )
 
         self.emissions_formula.configure(text = "42,8 GJ/t x 0,074 t CO2/GJ x 0,845t/1000l x " + self.quantity.get()+ "l")

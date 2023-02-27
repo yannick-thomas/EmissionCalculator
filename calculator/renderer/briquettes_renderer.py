@@ -18,7 +18,8 @@ class BriquettesRenderer(Renderer):
         main_content_heading = customtkinter.CTkLabel(
             self.main_content, 
             text="Emissionsberechnung für Briketts", 
-            font=customtkinter.CTkFont(size=20, weight="bold")
+            font=customtkinter.CTkFont(size=20, weight="bold"),
+            text_color=self.font_color
         )
         main_content_heading.grid(row=1, column=0, padx=(20, 0), pady=(20, 0), columnspan=4, sticky="nw")
         label_quantity_oil= customtkinter.CTkLabel(self.main_content, text="Liefermenge:", font=customtkinter.CTkFont(size=16))
@@ -27,25 +28,31 @@ class BriquettesRenderer(Renderer):
             self.main_content, 
             width=70, 
             font=customtkinter.CTkFont(size=12, weight="bold"), 
-            textvariable=self.quantity
+            textvariable=self.quantity,
+            text_color=self.font_color
         )
         entry_quantity_oil.grid(row=2, column=1, padx=(155, 0), pady=(20, 0), sticky="nw")
         label_quantity_measure = customtkinter.CTkLabel(
             self.main_content, text="t", 
-            font=customtkinter.CTkFont(size=16, weight="bold")
+            font=customtkinter.CTkFont(size=16, weight="bold"),
+            text_color=self.font_color
         )
         label_quantity_measure.grid(row=2, column=2, padx=(2, 0), pady=(20, 0), sticky="nw")
         calc_button_oil = customtkinter.CTkButton(
             self.main_content, 
             text="Berechnen", 
             width=120, 
-            command=self.calc
+            command=self.calc,
+            text_color=self.font_color,
+            fg_color=self.button_color,
+            hover_color=self.hover_color
         )
         calc_button_oil.grid(row=2, column=5, padx=(20, 0), pady=(20, 0))
         self.label_calc_failure = customtkinter.CTkLabel(
             self.main_content,
             text = "Fehler!",
-            font=customtkinter.CTkFont(size=16, weight="bold")
+            font=customtkinter.CTkFont(size=16, weight="bold"),
+            text_color=self.font_color
         )
         self.window.bind('<Return>', lambda event: self.calc())
 
@@ -86,64 +93,75 @@ class BriquettesRenderer(Renderer):
                 self.main_content,
                 text="Brennstoffemissionen der aktuellen Lieferung:", 
                 font=customtkinter.CTkFont(size=16), 
-                text_color="grey"
+                text_color=self.header_color
             )
             self.fuel_emission_calc_formula = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.fuel_emission_calc_equals = customtkinter.CTkLabel(
                 self.main_content,
                 text="≈",
-                font=customtkinter.CTkFont(size=18)
+                font=customtkinter.CTkFont(size=18),
+                text_color=self.formula_color
             )
             self.fuel_emission_calc_equals_result = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.price_comp_co2_costs_label = customtkinter.CTkLabel(
                 self.main_content, 
                 text="Preisbestandteil CO2 Kosten:", 
                 font=customtkinter.CTkFont(size=16), 
-                text_color="grey"
+                text_color=self.header_color
             )
             self.price_comp_co2_costs_formula = customtkinter.CTkLabel(
                 self.main_content, 
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.price_comp_co2_costs_equals = customtkinter.CTkLabel(
                 self.main_content, 
                 text="=", 
-                font=customtkinter.CTkFont(size=18)
+                font=customtkinter.CTkFont(size=18),
+                text_color=self.formula_color
             )
             self.result_co2_costs_label = customtkinter.CTkLabel(
                 self.main_content,
-                
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.energy_content_label = customtkinter.CTkLabel(
                 self.main_content, text="Energiegehalt der Lieferung:",
                 font=customtkinter.CTkFont(size=16),
-                text_color="grey"
+                text_color=self.header_color
             )
             self.energy_content_formula = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.energy_content_equals = customtkinter.CTkLabel(
                 self.main_content,
                 text="=",
-                font=customtkinter.CTkFont(size=18)
+                font=customtkinter.CTkFont(size=18),
+                text_color=self.formula_color
             )
             self.result_energy_content_label = customtkinter.CTkLabel(
                 self.main_content,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.formula_color
             )
             self.button_print = customtkinter.CTkButton(
                 self.main_content,
                 text="Drucken",
                 command=print_label,
-                font=customtkinter.CTkFont(size=14, weight="bold")
+                font=customtkinter.CTkFont(size=14, weight="bold"),
+                text_color=self.font_color,
+                fg_color=self.button_color,
+                hover_color=self.hover_color
             )
 
         self.fuel_emission_calc_formula.configure(
