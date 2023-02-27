@@ -30,7 +30,7 @@ class CalcApp(customtkinter.CTk):
         self.grid_rowconfigure((0, 1, 2), weight=1)
 
         ## Sidebar
-        self.sidebar = customtkinter.CTkFrame(self, width=160, corner_radius=0)
+        self.sidebar = customtkinter.CTkFrame(self, width=160, corner_radius=0, fg_color="#404040")
         self.sidebar.grid(row=0, column=0, rowspan=5, sticky="nsew")
         self.sidebar.grid_rowconfigure(5, weight=1)
         self.logo_label = customtkinter.CTkLabel(self.sidebar, text="Emissionsrechner", font=customtkinter.CTkFont(size=25, weight="bold"))

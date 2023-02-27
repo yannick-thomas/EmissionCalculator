@@ -25,7 +25,7 @@ class BriquettesRenderer(Renderer):
         label_quantity_oil.grid(row=2, column=0,columnspan=1, padx=(20, 0), pady=(20, 0), sticky="nw")
         entry_quantity_oil = customtkinter.CTkEntry(
             self.main_content, 
-            width=50, 
+            width=70, 
             font=customtkinter.CTkFont(size=12, weight="bold"), 
             textvariable=self.quantity
         )
