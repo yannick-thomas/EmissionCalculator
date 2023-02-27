@@ -11,6 +11,8 @@ class CalcApp(customtkinter.CTk):
     WIDTH = 980
     HEIGHT = 720
 
+    BUTTON_COLOR = "#e67b36"
+
     def __init__(self):
         super().__init__()
 
@@ -29,15 +31,33 @@ class CalcApp(customtkinter.CTk):
         self.grid_columnconfigure((2, 3), weight=0)
         self.grid_rowconfigure((0, 1, 2), weight=1)
 
-        ## Sidebar
-        self.sidebar = customtkinter.CTkFrame(self, width=160, corner_radius=0, fg_color="#404040")
+        ## Sidebar 
+        self.sidebar = customtkinter.CTkFrame(self, width=160, corner_radius=0, fg_color="#2b2b2b")
         self.sidebar.grid(row=0, column=0, rowspan=5, sticky="nsew")
         self.sidebar.grid_rowconfigure(5, weight=1)
-        self.logo_label = customtkinter.CTkLabel(self.sidebar, text="Emissionsrechner", font=customtkinter.CTkFont(size=25, weight="bold"))
+        self.logo_label = customtkinter.CTkLabel(self.sidebar, text="Emissionsrechner", text_color="#e67b36" ,font=customtkinter.CTkFont(size=25, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
-        self.sidebar_briquettes = customtkinter.CTkButton(self.sidebar, command=self.calc_briquettes, text="Briketts")
+        self.sidebar_briquettes = customtkinter.CTkButton(
+            self.sidebar, 
+            command=self.calc_briquettes, 
+            text="Briketts",
+            height=30,
+            width=150,
+            fg_color=self.BUTTON_COLOR, 
+            hover_color="#D67334",
+            font=customtkinter.CTkFont(size=16, weight="bold")
+        )
         self.sidebar_briquettes.grid(row=1, column=0, padx=20, pady=10)
-        self.sidebar_heating_oil = customtkinter.CTkButton(self.sidebar, command=self.calc_heating_oil, text="Heizöl")
+        self.sidebar_heating_oil = customtkinter.CTkButton(
+            self.sidebar, 
+            command=self.calc_heating_oil, 
+            text="Heizöl",
+            height=30,
+            width=150,
+            fg_color=self.BUTTON_COLOR, 
+            hover_color="#D67334",
+            font=customtkinter.CTkFont(size=16, weight="bold")
+        )
         self.sidebar_heating_oil.grid(row=2, column= 0, padx= 20, pady=10)
 
     ## functions

@@ -5,10 +5,8 @@ class OilCalculation(Calculation):
     def calculate(self):
         result = []
         try:
-            if float(self.quantity) > 1:
-                emissions = round(42.8 * 0.074 * 0.845 * float(self.quantity.replace(",", ".")), 3)
-            else:
-                emissions = round(42.8 * 0.074 * 0.845 * float(self.quantity.replace(",", ".")), 3)
+            self.quantity = str(self.quantity).replace(",", ".")
+            emissions = round(42.8 * 0.074 * 0.845 * float(self.quantity.replace(",", ".")), 3)
             emission_component_result = round(emissions, 2) / 1000 * 30 * 1.19
             energy_content = 42.8 * 0.845 / 1000 * float(self.quantity.replace(",", ".")) * 277.778
             result.append(True)
