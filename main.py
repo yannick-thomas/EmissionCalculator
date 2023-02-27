@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter
+import os
+import tempfile
 
 from calculator.renderer.oil_renderer import OilRenderer
 from calculator.renderer.briquettes_renderer import BriquettesRenderer
@@ -85,3 +87,4 @@ class CalcApp(customtkinter.CTk):
 if __name__ == "__main__":
     app = CalcApp()
     app.mainloop()
+    os.remove(os.path.join(tempfile.gettempdir(), 'label.pdf'))
