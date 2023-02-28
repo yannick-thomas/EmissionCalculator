@@ -73,6 +73,13 @@ class CalcApp(customtkinter.CTk):
             font=customtkinter.CTkFont(size=16)
         )
         self.sidebar_heating_oil.grid(row=2, column= 0, padx= 20, pady=10)
+        self.sidebar_copyright = customtkinter.CTkLabel(
+            self.sidebar,
+            text="©Lycr.eu",
+            font=customtkinter.CTkFont(size=16),
+            text_color=self.font_color
+        )
+        self.sidebar_copyright.grid(row=7, column=0, padx= 20, pady=10)
 
     ## functions
 
