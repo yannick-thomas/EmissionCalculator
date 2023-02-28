@@ -11,7 +11,7 @@ class OilCalculation(Calculation):
             result.append(True)
             result.append(self.format_output(emissions))
             result.append(self.format_output(emission_component_result))
-            result.append(self.format_output(energy_content, True))
+            result.append(self.format_output(energy_content, True
         except:
             result.append(False)
         return result
