@@ -46,7 +46,7 @@ class CalcApp(customtkinter.CTk):
             self.sidebar, 
             text="Emissionsrechner", 
             text_color=self.sidebar_header_color,
-            font=customtkinter.CTkFont(size=25, weight="bold")
+            font=customtkinter.CTkFont(size=30, weight="bold")
         )
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
         self.sidebar_briquettes = customtkinter.CTkButton(
@@ -73,6 +73,13 @@ class CalcApp(customtkinter.CTk):
             font=customtkinter.CTkFont(size=16)
         )
         self.sidebar_heating_oil.grid(row=2, column= 0, padx= 20, pady=10)
+        self.sidebar_copyright = customtkinter.CTkLabel(
+            self.sidebar,
+            text="©Lycr.eu",
+            font=customtkinter.CTkFont(size=16),
+            text_color=self.font_color
+        )
+        self.sidebar_copyright.grid(row=7, column=0, padx= 20, pady=10)
 
     ## functions
 
@@ -87,4 +94,5 @@ class CalcApp(customtkinter.CTk):
 if __name__ == "__main__":
     app = CalcApp()
     app.mainloop()
-    os.remove(os.path.join(tempfile.gettempdir(), 'label.pdf'))
+    if os.path.isfile(os.path.join(tempfile.gettempdir(), 'label.pdf')):
+        os.remove(os.path.join(tempfile.gettempdir(), 'label.pdf'))
