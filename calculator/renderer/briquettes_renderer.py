@@ -168,19 +168,19 @@ class BriquettesRenderer(Renderer):
             text="19,0 GJ/t x 0,0992t CO2 / GJ x 1 x " + self.quantity.get() + "t", 
         )
         self.fuel_emission_calc_equals_result.configure(
-            text=str(round(result[1], 2)).replace(".", ",") + "kg CO2"
+            text=result[1] + "kg CO2"
         )
         self.price_comp_co2_costs_formula.configure(
-            text=str(round(result[1], 2)).replace(".", ",") + "kg CO2 x 30€/ CO2 t x 1,19", 
+            text=result[1] + "kg CO2 x 30€/ CO2 t x 1,19", 
         )
         self.result_co2_costs_label.configure(
-            text=str(round(result[2], 2)).replace(".", ",") + " €",
+            text=result[2] + " €",
         )
         self.energy_content_formula.configure(
             text="19,0 GJ x 1 x " + self.quantity.get() + "t"
         )
         self.result_energy_content_label.configure(
-            text=str(result[3]).replace(".", ",") + " GJ"
+            text=result[3] + " kWh"
         )
 
         self.energy_content_equals.grid(row=6,columnspan=3, column=0, padx=(330, 0), pady=(65, 0), sticky="nw")

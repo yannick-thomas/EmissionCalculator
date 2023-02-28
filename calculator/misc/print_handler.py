@@ -40,8 +40,8 @@ class PrintHandler():
         """)
 
         return template.render(
-            emission_component_result = str(round(self.results[2], 2)).replace(".", ","),
-            emissions = re.sub(r'(?<!^)(?=(\d{3})+,)', r'.',str(format(self.results[1], '.2f')).replace(".", ",")),
+            emission_component_result = self.results[2],
+            emissions = self.results[1],
             energy_content = self.results[3]
         )
 
