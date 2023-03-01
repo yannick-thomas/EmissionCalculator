@@ -34,6 +34,7 @@ class CalcApp(customtkinter.CTk):
         self.geometry(f"{CalcApp.WIDTH}x{CalcApp.HEIGHT}")
         self.minsize(self.WIDTH, self.HEIGHT)
         self.maxsize(self.WIDTH, self.HEIGHT)
+        self.iconbitmap("favicon.ico")
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure((2, 3), weight=0)

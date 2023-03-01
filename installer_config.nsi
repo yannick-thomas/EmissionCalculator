@@ -3,6 +3,7 @@ OutFile "installer.exe"
 InstallDir "$PROGRAMFILES\emissionsrechner"
 
 RequestExecutionLevel admin
+Icon "favicon.ico"
 
 Section 
     SetOutPath $INSTDIR
