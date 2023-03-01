@@ -10,8 +10,8 @@ from calculator.renderer.briquettes_renderer import BriquettesRenderer
 
 class CalcApp(customtkinter.CTk):
 
-    WIDTH = 980
-    HEIGHT = 720
+    WIDTH = 940
+    HEIGHT = 520
 
     button_color = "#e67b36"
     font_color = "white"
@@ -19,6 +19,7 @@ class CalcApp(customtkinter.CTk):
     sidebar_header_color = "#e67b36"
     header_color = "grey"
     formula_color = "white"
+    copyright_color= "#6b6b6b"
 
     def __init__(self):
         super().__init__()
@@ -72,17 +73,16 @@ class CalcApp(customtkinter.CTk):
             hover_color=self.hover_color,
             font=customtkinter.CTkFont(size=16)
         )
-        self.sidebar_heating_oil.grid(row=2, column= 0, padx= 20, pady=10)
+        self.sidebar_heating_oil.grid(row=2, column= 0, padx=20, pady=10)
         self.sidebar_copyright = customtkinter.CTkLabel(
             self.sidebar,
-            text="©Lycr.eu",
+            text="© Lycr.eu",
             font=customtkinter.CTkFont(size=16),
-            text_color=self.font_color
+            text_color=self.copyright_color
         )
-        self.sidebar_copyright.grid(row=7, column=0, padx= 20, pady=10)
+        self.sidebar_copyright.grid(row=7, column=0, padx=20, pady=10)
 
     ## functions
-
     def calc_briquettes(self):
         briquettes_renderer = BriquettesRenderer(self, self.button_color, self.font_color, self.hover_color, self.sidebar_header_color, self.header_color, self.formula_color)
         briquettes_renderer.build_base()

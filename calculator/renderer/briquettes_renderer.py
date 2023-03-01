@@ -47,7 +47,7 @@ class BriquettesRenderer(Renderer):
             fg_color=self.button_color,
             hover_color=self.hover_color
         )
-        calc_button_oil.grid(row=2, column=5, padx=(20, 0), pady=(20, 0))
+        calc_button_oil.grid(row=2, column=5, padx=(80, 0), pady=(20, 0))
         self.label_calc_failure = customtkinter.CTkLabel(
             self.main_content,
             text = "Fehler!",
@@ -184,14 +184,17 @@ class BriquettesRenderer(Renderer):
         )
 
         self.energy_content_equals.grid(row=6,columnspan=3, column=0, padx=(330, 0), pady=(65, 0), sticky="nw")
+        
         self.fuel_emission_calc_label.grid(row=3,columnspan=3, column=0 ,padx=(20, 0), pady=(30, 0), sticky="nw")
         self.fuel_emission_calc_formula.grid(row=4,columnspan=3, column=0, padx=(20, 0), pady=(0, 0), sticky="nw")
         self.fuel_emission_calc_equals.grid(row=4,columnspan=3, column=0, padx=(330, 0), pady=(0, 0), sticky="nw")
         self.fuel_emission_calc_equals_result.grid(row=4,columnspan=3, column=3, padx=(20, 0), pady=(0, 0), sticky="nw")
+        
         self.price_comp_co2_costs_label.grid(row=5, columnspan=3 ,column=0,padx=(20, 0), pady=(10, 0), sticky="nw")
-        self.price_comp_co2_costs_formula.grid(row=6, columnspan=3 ,column=0,padx=(20, 0), pady=(0, 470), sticky="nw")
-        self.price_comp_co2_costs_equals.grid(row=6,columnspan=3, column=0, padx=(330, 0), pady=(0, 0), sticky="nw")
+        self.price_comp_co2_costs_formula.grid(row=6, columnspan=3 ,column=0,padx=(20, 0), pady=(0, 270), sticky="nw")
+        self.price_comp_co2_costs_equals.grid(row=6,columnspan=3, column=0, padx=(330, 0), pady=(0, 0), sticky="nw") 
         self.result_co2_costs_label.grid(row=6,columnspan=3, column=3, padx=(20, 0), pady=(0, 0), sticky="nw")
+        
         self.energy_content_label.grid(row=6,columnspan=3, column=0, padx=(20, 0), pady=(40, 0), sticky="nw")
         self.energy_content_formula.grid(row=6,columnspan=3, column=0, padx=(20, 0), pady=(65, 0), sticky="nw")
         self.result_energy_content_label.grid(row=6,columnspan=3, column=3, padx=(20, 0), pady=(65, 0), sticky="nw")

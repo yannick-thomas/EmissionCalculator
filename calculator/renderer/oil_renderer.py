@@ -38,7 +38,7 @@ class OilRenderer(Renderer):
             font=customtkinter.CTkFont(size=16, weight="bold"),
             text_color=self.font_color
         )
-        label_quantity_measure.grid(row=2, column=2, padx=(2, 0), pady=(20, 0), sticky="nw")
+        label_quantity_measure.grid(row=2, column=1,columnspan=5 ,padx=(230, 0), pady=(20, 0), sticky="nw")
         calc_button_oil = customtkinter.CTkButton(
             self.main_content, 
             text="Berechnen", 
@@ -48,7 +48,7 @@ class OilRenderer(Renderer):
             text_color=self.font_color,
             hover_color=self.hover_color
         )
-        calc_button_oil.grid(row=2, column=5, padx=(20, 0), pady=(20, 0))
+        calc_button_oil.grid(row=2, column=1, columnspan=5,padx=(320, 0), pady=(20, 0))
         self.label_calc_failure = customtkinter.CTkLabel(
             self.main_content,
             text = "Fehler!",
@@ -84,7 +84,7 @@ class OilRenderer(Renderer):
                 self.energy_component_result_label.grid_forget()
                 self.button_print.grid_forget()
                 self.label_calc_failure.grid_forget()
-            self.label_calc_failure.grid(row=3, column=1, padx=(100, 0), pady=(30, 0), sticky="nw")
+            self.label_calc_failure.grid(row=3, column=1, padx=(155, 0), pady=(30, 0), sticky="nw")
             self.is_valid_calc = False
             return
 
@@ -169,14 +169,17 @@ class OilRenderer(Renderer):
         self.emissions_formula.grid(row=4 ,columnspan=6,column=0, padx=(20, 0), pady=(0, 0), sticky="nw")
         self.emissions_equals.grid(row=4,columnspan=6, column=2, padx=(80, 0), pady=(0, 0), sticky="nw")
         self.emissions_result.grid(row=4,columnspan=6, column=3, padx=(120, 0), pady=(0, 0), sticky="nw")
+
         self.emission_component_heading.grid(row=5, columnspan= 6, column=0, padx=(20, 0), pady=(20, 0), sticky="nw")
-        self.emission_component_formula.grid(row=6, columnspan=6, column=0, padx=(20, 0), pady=(0, 460), sticky="nw")
+        self.emission_component_formula.grid(row=6, columnspan=6, column=0, padx=(20, 0), pady=(0, 260), sticky="nw")
         self.emission_component_equals.grid(row=6,columnspan=6, column=2, padx=(80, 0), pady=(0, 0), sticky="nw")
         self.emission_component_result_label.grid(row=6, columnspan=6, column=3, padx=(120, 0), pady=(0, 0), sticky="nw")
+        
         self.energy_component_heading.grid(row=6, columnspan= 6, column=0, padx=(20, 0), pady=(50, 0), sticky="nw")
         self.energy_component_formula.grid(row=6, columnspan= 6, column=0, padx=(20, 0), pady=(80, 0), sticky="nw")
         self.energy_component_equals.grid(row=6,columnspan=6, column=2, padx=(80, 0), pady=(80, 0), sticky="nw")
         self.energy_component_result_label.grid(row=6, columnspan=6, column=3, padx=(120, 0), pady=(80, 0), sticky="nw")
-        self.button_print.grid(row=6,columnspan=3, column=1, padx=(50, 0), pady=(120, 0), sticky="nw")
+        
+        self.button_print.grid(row=6,columnspan=3, column=1, padx=(130, 0), pady=(150, 0), sticky="nw")
 
         self.is_valid_calc = True
