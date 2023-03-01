@@ -22,20 +22,26 @@ class BriquettesRenderer(Renderer):
             text_color=self.font_color
         )
         main_content_heading.grid(row=1, column=0, padx=(20, 0), pady=(20, 0), columnspan=4, sticky="nw")
-        label_quantity_oil= customtkinter.CTkLabel(self.main_content, text="Liefermenge:", font=customtkinter.CTkFont(size=16))
+        label_quantity_oil= customtkinter.CTkLabel(
+            self.main_content, 
+            text="Liefermenge:", 
+            font=customtkinter.CTkFont(size=16),
+            text_color=self.font_color
+        )
         label_quantity_oil.grid(row=2, column=0,columnspan=1, padx=(20, 0), pady=(20, 0), sticky="nw")
         entry_quantity_oil = customtkinter.CTkEntry(
             self.main_content, 
             width=70, 
             font=customtkinter.CTkFont(size=12, weight="bold"), 
             textvariable=self.quantity,
-            text_color=self.font_color
+            text_color=self.font_color,
+            fg_color=self.entrybox_color
         )
         entry_quantity_oil.grid(row=2, column=1, padx=(155, 0), pady=(20, 0), sticky="nw")
         label_quantity_measure = customtkinter.CTkLabel(
             self.main_content, text="t", 
             font=customtkinter.CTkFont(size=16, weight="bold"),
-            text_color=self.font_color
+            text_color=self.font_color,
         )
         label_quantity_measure.grid(row=2, column=2, padx=(2, 0), pady=(20, 0), sticky="nw")
         calc_button_oil = customtkinter.CTkButton(
