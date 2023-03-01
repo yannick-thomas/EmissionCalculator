@@ -4,4 +4,4 @@
 The EmissionCalculator is a lightweight Python desktop app to calculate emissions, CO2 costs and energy content of briquette and heating oil deliveries.
 
 ## How to use it?
-To get the EmissionCalculator, just download the installer from "Releases" and your're all set! ;)
+To get the EmissionCalculator, just download the installer from "Releases" and you're all set! ;)
