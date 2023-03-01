@@ -19,7 +19,8 @@ class CalcApp(customtkinter.CTk):
     sidebar_header_color = "#e67b36"
     header_color = "grey"
     formula_color = "white"
-    copyright_color= "#6b6b6b"
+    copyright_color = "#6b6b6b"
+    entrybox_color = "#343638"
 
     def __init__(self):
         super().__init__()
@@ -85,11 +86,11 @@ class CalcApp(customtkinter.CTk):
 
     ## functions
     def calc_briquettes(self):
-        briquettes_renderer = BriquettesRenderer(self, self.button_color, self.font_color, self.hover_color, self.sidebar_header_color, self.header_color, self.formula_color)
+        briquettes_renderer = BriquettesRenderer(self, self.button_color, self.font_color, self.hover_color, self.sidebar_header_color, self.header_color, self.formula_color, self.entrybox_color)
         briquettes_renderer.build_base()
         
     def calc_heating_oil(self):
-        oil_renderer = OilRenderer(self, self.button_color, self.font_color, self.hover_color, self.sidebar_header_color, self.header_color, self.formula_color)
+        oil_renderer = OilRenderer(self, self.button_color, self.font_color, self.hover_color, self.sidebar_header_color, self.header_color, self.formula_color, self.entrybox_color)
         oil_renderer.build_base()
 
 if __name__ == "__main__":
