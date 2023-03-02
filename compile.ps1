@@ -22,5 +22,3 @@ $create_installer = 'makensis installer_config.nsi;'
 
 $args = '-noexit -noprofile -command "' + $cd_to_workdir + 'echo "Checking requirements...`n;"' + $install_requirements + 'echo "`n`nCompiling...`n;"' + $compile_exe + 'echo "`n`nCopying Favicon...`n;"'+ $copy_icon + 'echo "`n`nCreating installer...`n;"' + $create_installer + '"'
 Start-Process powershell -Verb RunAs -ArgumentList $args
-
-# 'echo "`n`nDeleting existing build...`n;"'+ $delete_existing_build +
