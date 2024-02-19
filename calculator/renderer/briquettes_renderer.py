@@ -183,7 +183,7 @@ class BriquettesRenderer(Renderer):
             text=result[2] + " €",
         )
         self.energy_content_formula.configure(
-            text="19,0 GJ x 1 x " + self.quantity.get() + "t"
+            text="19,0 GJ x 277,778 x " + self.quantity.get() + "t"
         )
         self.result_energy_content_label.configure(
             text=result[3] + " kWh"
