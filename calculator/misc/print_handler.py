@@ -34,7 +34,7 @@ class PrintHandler():
             </head>
             <body>
                 <p><b>enth. CO2 Abgabe {{ emission_component_result }} EUR, Brutto</b> / CO2 Abgabe pro t 30,00 EUR, Netto</p>
-                <p>CO2 Kg der Lieferung {{ emissions }} / CO2 Kg pro kWh 2,2664 / kWh der Lieferung {{ energy_content }}</p>
+                <p>CO2 Kg der Lieferung {{ emissions }} / CO2 Kg pro kWh {{ co2_per_kwh }} / kWh der Lieferung {{ energy_content }}</p>
             </body>
             </html>
         """)
@@ -42,7 +42,8 @@ class PrintHandler():
         return template.render(
             emission_component_result = self.results[2],
             emissions = self.results[1],
-            energy_content = self.results[3]
+            energy_content = self.results[3],
+            co2_per_kwh = self.results[4]
         )
 
     def convert_template(self):
