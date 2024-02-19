@@ -1,7 +1,6 @@
 from calculator.calc.calculation import Calculation
 
 class OilCalculation(Calculation):
-
     def calculate(self):
         result = []
         try:
@@ -12,7 +11,7 @@ class OilCalculation(Calculation):
             result.append(self.format_output(emissions))
             result.append(self.format_output(emission_component_result))
             result.append(self.format_output(energy_content, True))
+            result.append("0,2664")
         except:
             result.append(False)
         return result
-        
