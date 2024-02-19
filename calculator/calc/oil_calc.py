@@ -1,7 +1,6 @@
 from calculator.calc.calculation import Calculation
 
 class OilCalculation(Calculation):
-
     def calculate(self):
         result = []
         try:
@@ -15,4 +14,3 @@ class OilCalculation(Calculation):
         except:
             result.append(False)
         return result
-        
