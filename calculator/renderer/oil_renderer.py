@@ -166,7 +166,7 @@ class OilRenderer(Renderer):
 
         self.emissions_formula.configure(text = "42,8 GJ/t x 0,074 t CO2/GJ x 0,845t/1000l x " + self.quantity.get()+ "l")
         self.emissions_result.configure(text = result[1] + "kg CO2")
-        self.emission_component_formula.configure(text = result[1] + "kg CO2 x 30€/t CO2 x 1,19 MwSt.")
+        self.emission_component_formula.configure(text = result[1] + "kg CO2 x 45€/t CO2 x 1,19 MwSt.")
         self.emission_component_result_label.configure(text = result[2] + "€")
         self.energy_component_formula.configure(text="42,8 GJ/t x 0,845 t/1000 Liter x " + str(self.quantity.get()) + "l")
         self.energy_component_result_label.configure(text= result[3] + " kWh")

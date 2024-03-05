@@ -177,7 +177,7 @@ class BriquettesRenderer(Renderer):
             text=result[1] + "kg CO2"
         )
         self.price_comp_co2_costs_formula.configure(
-            text=result[1] + "kg CO2 x 30€/ CO2 t x 1,19", 
+            text=result[1] + "kg CO2 x 45€/ CO2 t x 1,19", 
         )
         self.result_co2_costs_label.configure(
             text=result[2] + " €",

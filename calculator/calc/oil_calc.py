@@ -5,7 +5,7 @@ class OilCalculation(Calculation):
         result = []
         try:
             emissions = 42.8 * 0.074 * 0.845 * float(self.quantity.replace(",", "."))
-            emission_component_result = round(emissions, 2) / 1000 * 30 * 1.19
+            emission_component_result = round(emissions, 2) / 1000 * 45 * 1.19
             energy_content = 42.8 * 0.845 / 1000 * float(self.quantity.replace(",", ".")) * 277.778
             result.append(True)
             result.append(self.format_output(emissions))

@@ -8,7 +8,7 @@ class BriquettesCalculation(Calculation):
             emissions = 19 * 0.0992 * 1000 * float(
                 self.quantity.replace(",", ".")
             )
-            emission_component_result =  emissions * 30 * 1.19 / 1000
+            emission_component_result =  emissions * 45 * 1.19 / 1000
             energy_content = 19 * 277.778 * float(self.quantity.replace(",", "."))
 
             result.append(True)

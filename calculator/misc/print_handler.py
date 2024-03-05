@@ -33,7 +33,7 @@ class PrintHandler():
                 </style>
             </head>
             <body>
-                <p><b>enth. CO2 Abgabe {{ emission_component_result }} EUR, Brutto</b> / CO2 Abgabe pro t 30,00 EUR, Netto</p>
+                <p><b>enth. CO2 Abgabe {{ emission_component_result }} EUR, Brutto</b> / CO2 Abgabe pro t 45,00 EUR, Netto</p>
                 <p>CO2 Kg der Lieferung {{ emissions }} / CO2 Kg pro kWh {{ co2_per_kwh }} / kWh der Lieferung {{ energy_content }}</p>
             </body>
             </html>
