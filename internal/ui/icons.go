@@ -7,12 +7,12 @@ import (
 )
 
 func navigationIconResource(kind string, active, highlighted bool) fyne.Resource {
-	stroke := "#D6DDFF"
+	stroke := "#616673"
 	if highlighted && !active {
-		stroke = "#FFFFFF"
+		stroke = "#3155D7"
 	}
 	if active {
-		stroke = "#3155D7"
+		stroke = "#18213D"
 	}
 	var paths string
 	if kind == "oil" {

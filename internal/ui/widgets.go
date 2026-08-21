@@ -208,7 +208,7 @@ func (button *fuelNavigationButton) CreateRenderer() fyne.WidgetRenderer {
 		button:     button,
 		background: canvas.NewRectangle(color.Transparent),
 		icon:       canvas.NewImageFromResource(navigationIconResource(button.iconKind, button.active, false)),
-		label:      canvasText(button.label, 16, appPalette.whiteMuted, true),
+		label:      canvasText(button.label, 16, appPalette.textSecondary, true),
 	}
 	renderer.background.CornerRadius = 18
 	renderer.icon.FillMode = canvas.ImageFillContain
@@ -238,21 +238,21 @@ func (renderer *fuelNavigationRenderer) MinSize() fyne.Size { return fyne.NewSiz
 
 func (renderer *fuelNavigationRenderer) Refresh() {
 	background := color.Color(color.Transparent)
-	textColor := appPalette.whiteMuted
+	textColor := appPalette.textSecondary
 	if renderer.button.hovered && !renderer.button.active {
-		background = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 28}
-		textColor = appPalette.white
+		background = appPalette.accentSoft
+		textColor = appPalette.accent
 	}
 	if renderer.button.pressed && !renderer.button.active {
-		background = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 44}
+		background = appPalette.accentSoft
 	}
 	if renderer.button.active {
-		background = appPalette.white
-		textColor = appPalette.accent
+		background = appPalette.resultSurface
+		textColor = appPalette.textPrimary
 	}
 	renderer.background.FillColor = background
 	if renderer.button.focused {
-		renderer.background.StrokeColor = appPalette.resultSurface
+		renderer.background.StrokeColor = appPalette.accent
 		renderer.background.StrokeWidth = 2
 	} else {
 		renderer.background.StrokeColor = color.Transparent
@@ -442,7 +442,7 @@ func newQuantityControl(entry *focusEntry, unitValue string) *quantityControl {
 	control.underline = canvas.NewRectangle(appPalette.textPrimary)
 	control.underline.SetMinSize(fyne.NewSize(1, 3))
 	control.content = container.NewVBox(
-		container.NewGridWrap(fyne.NewSize(ui.contentWidth, 58), inputContent),
+		container.NewGridWrap(fyne.NewSize(ui.formColWidth, 58), inputContent),
 		control.underline,
 	)
 	control.refreshBorder()

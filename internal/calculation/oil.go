@@ -2,16 +2,13 @@ package calculation
 
 import "emissioncalculator/internal/models"
 
-func CalculateOil(quantity float64) models.CalculationResult {
+func CalculateOil(quantity float64, cfg Config) models.CalculationResult {
 	result := models.CalculationResult{Valid: true}
-
 	emissions := 42.8 * 0.074 * 0.845 * quantity
-	emissionComponentResult := (emissions / 1000.0) * 45.0 * 1.19
 	energyContent := 42.8 * 0.845 / 1000.0 * quantity * 277.778
-
-	result.Emissions = FormatWithLocale(emissions, false) + " kg CO2"
-	result.EmissionCost = FormatWithLocale(emissionComponentResult, false) + " €"
-	result.EnergyContent = FormatWithLocale(energyContent, true) + " kWh"
-	result.CO2PerKWh = "0,2664"
+	result.Emissions = emissions
+	result.EmissionCost = (emissions / 1000.0) * cfg.CO2PricePerTonne * 1.19
+	result.EnergyContent = energyContent
+	result.CO2PerKWh = emissions / energyContent
 	return result
 }

@@ -13,10 +13,11 @@ import (
 )
 
 type designTokens struct {
-	topBarHeight float32
-	contentWidth float32
-	pageHeight   float32
-	resultHeight float32
+	topBarHeight   float32
+	contentWidth   float32
+	formColWidth   float32
+	resultColWidth float32
+	colHeight      float32
 }
 
 type palette struct {
@@ -40,15 +41,16 @@ type palette struct {
 }
 
 var ui = designTokens{
-	topBarHeight: 96,
-	contentWidth: 1000,
-	pageHeight:   1410,
-	resultHeight: 540,
+	topBarHeight:   96,
+	contentWidth:   1000,
+	formColWidth:   460,
+	resultColWidth: 520,
+	colHeight:      680,
 }
 
 var appPalette = palette{
 	background:     color.NRGBA{R: 0xf4, G: 0xf1, B: 0xe8, A: 255},
-	railBackground: color.NRGBA{R: 0x31, G: 0x55, B: 0xd7, A: 255},
+	railBackground: color.NRGBA{R: 0xf4, G: 0xf1, B: 0xe8, A: 255},
 	surface:        color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 255},
 	resultSurface:  color.NRGBA{R: 0xe1, G: 0xf7, B: 0x7b, A: 255},
 	border:         color.NRGBA{R: 0xd4, G: 0xd1, B: 0xc8, A: 255},

@@ -26,7 +26,7 @@ func TestReferenceViewCalculatesBothModesAndPrints(t *testing.T) {
 	}
 	openExportedFile = func(string) error { return nil }
 
-	oilView := buildReferenceView(window, "oil")
+	oilView := buildReferenceView(window, modeOil)
 	oilView.quantityEntry.SetText("10.0")
 	test.Tap(oilView.calculateButton)
 	if oilView.resultValue.Text != "26,76" || oilView.resultUnit.Text != "kg CO₂" {
@@ -43,7 +43,7 @@ func TestReferenceViewCalculatesBothModesAndPrints(t *testing.T) {
 		t.Fatalf("unexpected PDF status: %s", oilView.headerStatus.Text)
 	}
 
-	briquettesView := buildReferenceView(window, "briketts")
+	briquettesView := buildReferenceView(window, modeBriquettes)
 	briquettesView.quantityEntry.SetText("1,5")
 	briquettesView.quantityEntry.OnSubmitted(briquettesView.quantityEntry.Text)
 	if briquettesView.resultValue.Text != "2.827,20" || briquettesView.resultUnit.Text != "kg CO₂" {
@@ -55,7 +55,7 @@ func TestReferenceViewShowsAndClearsValidationState(t *testing.T) {
 	app := test.NewApp()
 	defer app.Quit()
 	window := app.NewWindow("test")
-	view := buildReferenceView(window, "oil")
+	view := buildReferenceView(window, modeOil)
 
 	view.quantityEntry.SetText("ungültig")
 	test.Tap(view.calculateButton)
@@ -67,8 +67,8 @@ func TestReferenceViewShowsAndClearsValidationState(t *testing.T) {
 	}
 
 	view.quantityEntry.SetText("12,5")
-	if view.quantityControl.invalid || view.headerStatus.Text != "Bereit" {
-		t.Fatal("expected editing to clear the validation state")
+	if view.quantityControl.invalid || view.headerStatus.Text != "Berechnet" {
+		t.Fatal("expected live calculation to clear the validation state and show a result")
 	}
 }
 
@@ -122,7 +122,7 @@ func TestReferenceViewFitsTargetWindow(t *testing.T) {
 	app := test.NewApp()
 	defer app.Quit()
 	window := app.NewWindow("test")
-	view := buildReferenceView(window, "oil")
+	view := buildReferenceView(window, modeOil)
 	if view.scroll == nil {
 		t.Fatal("expected the long reference layout to be vertically scrollable")
 	}

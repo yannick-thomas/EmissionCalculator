@@ -12,7 +12,24 @@ func ParseQuantity(input string) (float64, error) {
 		return 0, fmt.Errorf("Bitte gültige Liefermenge eingeben")
 	}
 
-	normalized := strings.ReplaceAll(trimmed, ",", ".")
+	var normalized string
+	switch {
+	case strings.Contains(trimmed, ","):
+		// German format: periods are thousands separators, comma is decimal
+		normalized = strings.ReplaceAll(trimmed, ".", "")
+		normalized = strings.ReplaceAll(normalized, ",", ".")
+	case strings.Contains(trimmed, "."):
+		// Period with exactly 3 trailing digits → German thousands separator
+		lastDot := strings.LastIndex(trimmed, ".")
+		if len(trimmed)-lastDot-1 == 3 {
+			normalized = strings.ReplaceAll(trimmed, ".", "")
+		} else {
+			normalized = trimmed
+		}
+	default:
+		normalized = trimmed
+	}
+
 	value, err := strconv.ParseFloat(normalized, 64)
 	if err != nil {
 		return 0, fmt.Errorf("Bitte gültige Zahl eingeben")
