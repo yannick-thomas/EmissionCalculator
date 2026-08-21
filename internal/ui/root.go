@@ -49,29 +49,31 @@ type referenceView struct {
 	costValue             *canvas.Text
 	energyValue           *canvas.Text
 	co2Value              *canvas.Text
-	co2PriceEntry         *focusEntry
-	co2PriceControl       *quantityControl
+	configProvider        func() calculation.Config
 }
 
 func NewRootWindow(app fyne.App) fyne.Window {
 	app.Settings().SetTheme(emissionTheme{Theme: theme.LightTheme()})
 	window := app.NewWindow("Emissionsrechner")
 	window.Resize(fyne.NewSize(1080, 980))
-	oilView := buildReferenceView(window, modeOil)
-	briquettesView := buildReferenceView(window, modeBriquettes)
+	settings := newSettingsStore(app.Preferences())
+	oilView := buildReferenceViewWithConfig(window, modeOil, settings.Config)
+	briquettesView := buildReferenceViewWithConfig(window, modeBriquettes, settings.Config)
 	briquettesView.content.Hide()
-	navigation := buildSharedNavigation(oilView, briquettesView)
+	navigation := buildSharedNavigation(window, settings, oilView, briquettesView)
 	views := container.NewStack(oilView.content, briquettesView.content)
 	window.SetContent(container.NewBorder(navigation, nil, nil, nil, views))
 	return window
 }
 
 func buildReferenceView(window fyne.Window, mode string) *referenceView {
-	view := &referenceView{mode: mode}
+	return buildReferenceViewWithConfig(window, mode, calculation.DefaultConfig)
+}
+
+func buildReferenceViewWithConfig(window fyne.Window, mode string, configProvider func() calculation.Config) *referenceView {
+	view := &referenceView{mode: mode, configProvider: configProvider}
 	view.quantityEntry = newFocusEntry()
 	view.quantityEntry.SetPlaceHolder("z. B. 12.500 oder 12,5")
-	view.co2PriceEntry = newFocusEntry()
-	view.co2PriceEntry.SetText("45")
 	view.status = newStatusText()
 
 	view.resultValue = canvasText("—", 72, appPalette.textPrimary, true)
@@ -97,11 +99,6 @@ func buildReferenceView(window fyne.Window, mode string) *referenceView {
 		}
 		view.calculate()
 	}
-	view.co2PriceEntry.OnChanged = func(string) {
-		if _, err := validation.ParseQuantity(view.quantityEntry.Text); err == nil {
-			view.calculate()
-		}
-	}
 	view.setHeaderStatus("Bereit", appPalette.success)
 	return view
 }
@@ -122,7 +119,7 @@ func buildAppShell(view *referenceView) fyne.CanvasObject {
 	return container.NewStack(canvas.NewRectangle(appPalette.background), scroll)
 }
 
-func buildSharedNavigation(oilView, briquettesView *referenceView) fyne.CanvasObject {
+func buildSharedNavigation(window fyne.Window, settings *settingsStore, oilView, briquettesView *referenceView) fyne.CanvasObject {
 	logoBackground := canvas.NewImageFromResource(logoPanelResource())
 	logoBackground.FillMode = canvas.ImageFillStretch
 	logoText := canvasText("e°", 22, appPalette.textPrimary, true)
@@ -144,10 +141,22 @@ func buildSharedNavigation(oilView, briquettesView *referenceView) fyne.CanvasOb
 		briquettesView.content.Show()
 		oilView.content.Hide()
 	})
+	settingsButton := newCircleIconButton(settingsIconResource(), func() {
+		showSettingsDialog(window, settings, func() {
+			oilView.refreshForSettingsChange()
+			briquettesView.refreshForSettingsChange()
+		})
+	})
+	navigationDivider := canvas.NewRectangle(appPalette.border)
+	navigationDivider.SetMinSize(fyne.NewSize(1, 34))
 	navigationActions := container.NewHBox(
 		container.NewGridWrap(fyne.NewSize(136, 62), briquettesBtn),
 		horizontalGap(10),
 		container.NewGridWrap(fyne.NewSize(136, 62), oilBtn),
+		horizontalGap(14),
+		container.NewCenter(navigationDivider),
+		horizontalGap(14),
+		container.NewGridWrap(fyne.NewSize(54, 54), settingsButton),
 	)
 	barContent := container.NewBorder(nil, nil, logo, navigationActions, nil)
 	barFrame := container.NewGridWrap(fyne.NewSize(ui.contentWidth, ui.topBarHeight), barContent)
@@ -201,10 +210,7 @@ func buildForm(view *referenceView) fyne.CanvasObject {
 	)
 
 	view.quantityControl = newQuantityControl(view.quantityEntry, unitForMode(view.mode))
-	view.co2PriceControl = newQuantityControl(view.co2PriceEntry, "€/t")
 	statusFrame := container.NewGridWrap(fyne.NewSize(ui.formColWidth, 20), view.status)
-	co2Separator := canvas.NewRectangle(appPalette.border)
-	co2Separator.SetMinSize(fyne.NewSize(1, 1))
 	return container.NewVBox(
 		step,
 		verticalGap(30),
@@ -219,12 +225,6 @@ func buildForm(view *referenceView) fyne.CanvasObject {
 		statusFrame,
 		verticalGap(16),
 		container.NewHBox(view.calculateButton),
-		verticalGap(28),
-		co2Separator,
-		verticalGap(16),
-		canvasText("C O₂ - S T E U E R  ( € / T O N N E )", 12, appPalette.textSecondary, true),
-		verticalGap(12),
-		view.co2PriceControl.content,
 	)
 }
 
@@ -280,8 +280,8 @@ func (view *referenceView) calculate() {
 
 	view.quantityControl.SetError(false)
 	cfg := calculation.DefaultConfig()
-	if price, err := validation.ParseQuantity(view.co2PriceEntry.Text); err == nil {
-		cfg.CO2PricePerTonne = price
+	if view.configProvider != nil {
+		cfg = view.configProvider()
 	}
 	if view.mode == modeOil {
 		view.result = calculation.CalculateOil(input, cfg)
@@ -309,6 +309,16 @@ func (view *referenceView) calculate() {
 	canvas.Refresh(view.resultBadgeBackground)
 	setStatus(view.status, "Ergebnis aktualisiert", appPalette.success)
 	view.setHeaderStatus("Berechnet", appPalette.success)
+}
+
+func (view *referenceView) refreshForSettingsChange() {
+	if _, err := validation.ParseQuantity(view.quantityEntry.Text); err != nil {
+		view.setHeaderStatus("Bereit", appPalette.success)
+		return
+	}
+	view.calculate()
+	setStatus(view.status, "Mit neuem CO₂-Preis berechnet", appPalette.success)
+	view.setHeaderStatus("Aktualisiert", appPalette.success)
 }
 
 func (view *referenceView) clearResult() {
