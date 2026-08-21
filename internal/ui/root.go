@@ -60,7 +60,7 @@ var appPalette = palette{
 	background:     color.NRGBA{R: 0xf4, G: 0xf1, B: 0xe8, A: 255},
 	railBackground: color.NRGBA{R: 0x31, G: 0x55, B: 0xd7, A: 255},
 	surface:        color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 255},
-	resultSurface:  color.NRGBA{R: 0xdf, G: 0xfd, B: 0x72, A: 255},
+	resultSurface:  color.NRGBA{R: 0xe1, G: 0xf7, B: 0x7b, A: 255},
 	resultShadow:   color.NRGBA{R: 0xdc, G: 0xd7, B: 0xca, A: 255},
 	border:         color.NRGBA{R: 0xd9, G: 0xd5, B: 0xcb, A: 255},
 	textPrimary:    color.NRGBA{R: 0x18, G: 0x21, B: 0x3d, A: 255},
@@ -104,7 +104,7 @@ func (themeOverride emissionTheme) Color(name fyne.ThemeColorName, variant fyne.
 func NewRootWindow(app fyne.App) fyne.Window {
 	app.Settings().SetTheme(emissionTheme{Theme: theme.LightTheme()})
 	win := app.NewWindow("Emissionsrechner")
-	win.Resize(fyne.NewSize(1080, 700))
+	win.Resize(fyne.NewSize(1080, 650))
 	win.SetContent(buildView(win, "oil"))
 	return win
 }
@@ -149,7 +149,7 @@ func buildReferenceView(win fyne.Window, mode string) *referenceView {
 
 	view.calculateButton = widget.NewButton("Jetzt berechnen  →", view.calculate)
 	view.calculateButton.Importance = widget.HighImportance
-	view.printButton = widget.NewButtonWithIcon("", theme.DocumentSaveIcon(), view.print)
+	view.printButton = widget.NewButtonWithIcon("PDF", theme.DocumentSaveIcon(), view.print)
 	view.printButton.Importance = widget.LowImportance
 	view.printButton.Disable()
 	view.quantityEntry.OnSubmitted = func(string) { view.calculate() }
@@ -185,10 +185,10 @@ func buildNavigationRail(win fyne.Window, activeMode string) fyne.CanvasObject {
 	separator := canvas.NewRectangle(color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 70})
 	separator.SetMinSize(fyne.NewSize(1, 38))
 
-	briquettes := newFuelNavigationButton("B", "Briketts", activeMode == "briketts", func() {
+	briquettes := newFuelNavigationButton("briquettes", "Briketts", activeMode == "briketts", func() {
 		win.SetContent(buildView(win, "briketts"))
 	})
-	oil := newFuelNavigationButton("O", "Heizöl", activeMode == "oil", func() {
+	oil := newFuelNavigationButton("oil", "Heizöl", activeMode == "oil", func() {
 		win.SetContent(buildView(win, "oil"))
 	})
 
@@ -243,7 +243,7 @@ func buildWorkspace(view *referenceView) fyne.CanvasObject {
 		container.NewPadded(form),
 		container.NewPadded(container.NewCenter(result)),
 	)
-	frame := container.NewGridWrap(fyne.NewSize(900, 525), columns)
+	frame := container.NewGridWrap(fyne.NewSize(900, 480), columns)
 	return container.NewCenter(frame)
 }
 
@@ -269,10 +269,19 @@ func buildForm(view *referenceView) fyne.CanvasObject {
 	)
 
 	quantityLabel := canvasText("MENGE EINGEBEN", 10, appPalette.textSecondary, true)
-	unit := canvasText(unitForMode(view.mode), 14, appPalette.accent, true)
-	inputLine := canvas.NewRectangle(appPalette.textPrimary)
-	inputLine.SetMinSize(fyne.NewSize(1, 2))
-	input := container.NewBorder(nil, inputLine, nil, unit, view.quantityEntry)
+	unit := canvasText(unitForMode(view.mode), 12, appPalette.accent, true)
+	unitBackground := canvas.NewRectangle(appPalette.accentSoft)
+	unitBackground.CornerRadius = 8
+	unitPill := container.NewGridWrap(
+		fyne.NewSize(72, 36),
+		container.NewStack(unitBackground, container.NewCenter(unit)),
+	)
+	inputBackground := canvas.NewRectangle(appPalette.surface)
+	inputBackground.CornerRadius = 10
+	inputBackground.StrokeColor = appPalette.border
+	inputBackground.StrokeWidth = 1
+	inputContent := container.NewBorder(nil, nil, nil, unitPill, view.quantityEntry)
+	input := container.NewStack(inputBackground, container.NewPadded(inputContent))
 
 	return container.NewVBox(
 		step,
@@ -304,11 +313,11 @@ func buildResultCard(view *referenceView) fyne.CanvasObject {
 	separator.SetMinSize(fyne.NewSize(1, 1))
 	cardContent := container.NewVBox(
 		container.NewBorder(nil, nil, label, live, nil),
-		verticalGap(52),
+		verticalGap(42),
 		view.resultValue,
 		verticalGap(ui.spacingSmall),
 		view.resultHint,
-		verticalGap(42),
+		verticalGap(32),
 		separator,
 		verticalGap(ui.spacingMedium),
 		metrics,
@@ -323,7 +332,7 @@ func buildResultCard(view *referenceView) fyne.CanvasObject {
 	shadow := container.NewBorder(verticalGap(12), nil, horizontalGap(12), nil, shadowBackground)
 	foreground := container.NewBorder(nil, verticalGap(12), nil, horizontalGap(12), card)
 	stack := container.NewStack(shadow, foreground)
-	return container.NewGridWrap(fyne.NewSize(420, 410), stack)
+	return container.NewGridWrap(fyne.NewSize(420, 380), stack)
 }
 
 func (view *referenceView) calculate() {
@@ -385,7 +394,7 @@ func unitForMode(mode string) string {
 
 func detailValue(value string) *canvas.Text {
 	text := canvas.NewText(value, appPalette.textPrimary)
-	text.TextSize = 12
+	text.TextSize = 14
 	text.TextStyle = fyne.TextStyle{Bold: true}
 	return text
 }
@@ -450,18 +459,18 @@ func openFile(path string) error {
 
 type fuelNavigationButton struct {
 	widget.BaseWidget
-	iconLabel string
-	label     string
-	active    bool
-	onTapped  func()
+	iconKind string
+	label    string
+	active   bool
+	onTapped func()
 }
 
-func newFuelNavigationButton(iconLabel, label string, active bool, onTapped func()) *fuelNavigationButton {
+func newFuelNavigationButton(iconKind, label string, active bool, onTapped func()) *fuelNavigationButton {
 	button := &fuelNavigationButton{
-		iconLabel: iconLabel,
-		label:     label,
-		active:    active,
-		onTapped:  onTapped,
+		iconKind: iconKind,
+		label:    label,
+		active:   active,
+		onTapped: onTapped,
 	}
 	button.ExtendBaseWidget(button)
 	return button
@@ -482,12 +491,30 @@ func (button *fuelNavigationButton) CreateRenderer() fyne.WidgetRenderer {
 	}
 	background := canvas.NewRectangle(backgroundColor)
 	background.CornerRadius = 17
-	icon := canvasText(button.iconLabel, 17, textColor, true)
+	icon := navigationIcon(button.iconKind, button.active)
 	label := canvasText(button.label, 9, textColor, true)
 	content := container.NewCenter(container.NewVBox(
-		container.NewCenter(icon),
+		container.NewCenter(container.NewGridWrap(fyne.NewSize(22, 22), icon)),
 		verticalGap(ui.spacingTiny),
 		container.NewCenter(label),
 	))
 	return widget.NewSimpleRenderer(container.NewStack(background, content))
+}
+
+func navigationIcon(kind string, active bool) *canvas.Image {
+	stroke := "#D6DDFF"
+	if active {
+		stroke = "#3155D7"
+	}
+	var paths string
+	if kind == "oil" {
+		paths = `<path d="M12 3.5S6.8 9.5 6.8 14a5.2 5.2 0 0 0 10.4 0C17.2 9.5 12 3.5 12 3.5Z"/><path d="M9.5 15c.3 1.1 1.2 1.7 2.5 1.7"/>`
+	} else {
+		paths = `<path d="M5 8.5 9 4.5l4 4-4 4-4-4Z"/><path d="m11 15.5 4-4 4 4-4 4-4-4Z"/>`
+	}
+	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="%s" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">%s</g></svg>`, stroke, paths)
+	resource := fyne.NewStaticResource(kind+".svg", []byte(svg))
+	icon := canvas.NewImageFromResource(resource)
+	icon.FillMode = canvas.ImageFillContain
+	return icon
 }
