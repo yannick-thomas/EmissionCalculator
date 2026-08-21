@@ -17,7 +17,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 )
 
 var exportLabel = pdf.ExportLabel
@@ -25,10 +24,11 @@ var openExportedFile = openFile
 
 type referenceView struct {
 	content               fyne.CanvasObject
+	scroll                *container.Scroll
 	quantityEntry         *focusEntry
 	quantityControl       *quantityControl
 	calculateButton       *actionButton
-	printButton           *widget.Button
+	printButton           *circleIconButton
 	status                *canvas.Text
 	headerStatus          *canvas.Text
 	headerStatusDot       *canvas.Circle
@@ -49,7 +49,7 @@ type referenceView struct {
 func NewRootWindow(app fyne.App) fyne.Window {
 	app.Settings().SetTheme(emissionTheme{Theme: theme.LightTheme()})
 	window := app.NewWindow("Emissionsrechner")
-	window.Resize(fyne.NewSize(1080, 650))
+	window.Resize(fyne.NewSize(1080, 720))
 	window.SetContent(buildView(window, "oil"))
 	return window
 }
@@ -64,16 +64,15 @@ func buildReferenceView(window fyne.Window, mode string) *referenceView {
 	view.quantityEntry.SetPlaceHolder("z. B. 12.500 oder 12,5")
 	view.status = newStatusText()
 
-	view.resultValue = canvasText("—", 50, appPalette.textPrimary, true)
-	view.resultUnit = canvasText("", 16, appPalette.textPrimary, true)
-	view.resultHint = canvasText("Noch keine Berechnung", 12, appPalette.textSecondary, false)
+	view.resultValue = canvasText("—", 72, appPalette.textPrimary, true)
+	view.resultUnit = canvasText("", 23, appPalette.textPrimary, true)
+	view.resultHint = canvasText("Noch keine Berechnung", 16, appPalette.textSecondary, false)
 	view.costValue = detailValue("—")
 	view.energyValue = detailValue("—")
 	view.co2Value = detailValue("—")
 
 	view.calculateButton = newActionButton("Jetzt berechnen", view.calculate)
-	view.printButton = widget.NewButtonWithIcon("PDF", theme.DocumentSaveIcon(), view.print)
-	view.printButton.Importance = widget.LowImportance
+	view.printButton = newCircleIconButton(printIconResource(), view.print)
 	view.printButton.Disable()
 
 	view.content = buildAppShell(view, window)
@@ -89,47 +88,46 @@ func buildReferenceView(window fyne.Window, mode string) *referenceView {
 }
 
 func buildAppShell(view *referenceView, window fyne.Window) fyne.CanvasObject {
-	rail := buildNavigationRail(window, view.mode)
+	navigation := buildTopNavigation(window, view.mode)
 	header := buildHeader(view)
-	workspace := container.New(&workspaceLayout{}, buildForm(view), buildResultCard(view))
-
-	mainBackground := canvas.NewRectangle(appPalette.background)
-	main := container.NewStack(mainBackground, container.NewBorder(header, nil, nil, nil, workspace))
-	return container.NewBorder(nil, nil, rail, nil, main)
+	form := container.NewGridWrap(fyne.NewSize(ui.contentWidth, 560), buildForm(view))
+	result := container.NewGridWrap(fyne.NewSize(ui.contentWidth, ui.resultHeight), buildResultCard(view))
+	page := container.NewVBox(
+		header,
+		verticalGap(36),
+		form,
+		verticalGap(72),
+		result,
+		verticalGap(42),
+	)
+	pageFrame := container.NewGridWrap(fyne.NewSize(ui.contentWidth, ui.pageHeight), page)
+	scroll := container.NewVScroll(container.NewCenter(pageFrame))
+	view.scroll = scroll
+	main := container.NewStack(canvas.NewRectangle(appPalette.background), scroll)
+	return container.NewBorder(navigation, nil, nil, nil, main)
 }
 
-func buildNavigationRail(window fyne.Window, activeMode string) fyne.CanvasObject {
-	logoBackground := canvas.NewRectangle(appPalette.resultSurface)
-	logoBackground.CornerRadius = 15
-	logoText := canvasText("e°", 19, appPalette.textPrimary, true)
-	logo := container.NewGridWrap(
-		fyne.NewSize(50, 50),
-		container.NewStack(logoBackground, container.NewCenter(logoText)),
-	)
-
-	separator := canvas.NewRectangle(color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 50})
-	separator.SetMinSize(fyne.NewSize(1, 24))
+func buildTopNavigation(window fyne.Window, activeMode string) fyne.CanvasObject {
+	logoBackground := canvas.NewImageFromResource(logoPanelResource())
+	logoBackground.FillMode = canvas.ImageFillStretch
+	logoText := canvasText("e°", 22, appPalette.textPrimary, true)
+	logo := container.NewGridWrap(fyne.NewSize(64, 64), container.NewStack(logoBackground, container.NewCenter(logoText)))
 	briquettes := newFuelNavigationButton("briquettes", "Briketts", activeMode == "briketts", func() {
 		window.SetContent(buildView(window, "briketts"))
 	})
 	oil := newFuelNavigationButton("oil", "Heizöl", activeMode == "oil", func() {
 		window.SetContent(buildView(window, "oil"))
 	})
-	footer := canvasText("LYC.REU", 9, appPalette.whiteMuted, true)
-
-	navigation := container.NewVBox(
-		container.NewCenter(logo),
-		verticalGap(ui.spacingMedium),
-		container.NewCenter(container.NewGridWrap(fyne.NewSize(1, 24), separator)),
-		verticalGap(ui.spacingMedium),
-		container.NewCenter(container.NewGridWrap(fyne.NewSize(66, 66), briquettes)),
-		verticalGap(ui.spacingSmall),
-		container.NewCenter(container.NewGridWrap(fyne.NewSize(66, 66), oil)),
+	navigationActions := container.NewHBox(
+		container.NewGridWrap(fyne.NewSize(136, 62), briquettes),
+		horizontalGap(10),
+		container.NewGridWrap(fyne.NewSize(136, 62), oil),
 	)
-	inner := container.NewBorder(navigation, container.NewCenter(footer), nil, nil, nil)
+	barContent := container.NewBorder(nil, nil, logo, navigationActions, nil)
+	barFrame := container.NewGridWrap(fyne.NewSize(ui.contentWidth, ui.topBarHeight), barContent)
 	background := canvas.NewRectangle(appPalette.railBackground)
-	background.SetMinSize(fyne.NewSize(ui.railWidth, 0))
-	return container.NewStack(background, container.NewPadded(inner))
+	background.SetMinSize(fyne.NewSize(0, ui.topBarHeight))
+	return container.NewStack(background, container.NewCenter(barFrame))
 }
 
 func buildHeader(view *referenceView) fyne.CanvasObject {
@@ -137,100 +135,100 @@ func buildHeader(view *referenceView) fyne.CanvasObject {
 		coloredBar(appPalette.accent, 8, 19),
 		coloredBar(appPalette.coral, 8, 12),
 	)
-	brand := canvasText("CO2-Kennzahlen", 14, appPalette.textPrimary, true)
+	brand := canvasText("Emissionsrechner", 18, appPalette.textPrimary, true)
 	brandGroup := container.NewHBox(brandBars, brand)
 
 	view.headerStatusDot = canvas.NewCircle(appPalette.success)
-	readyIndicator := container.NewGridWrap(fyne.NewSize(9, 9), view.headerStatusDot)
-	view.headerStatus = canvasText("Bereit", 12, appPalette.textSecondary, false)
-	statusGroup := container.NewGridWrap(
-		fyne.NewSize(150, 36),
-		container.NewCenter(container.NewHBox(readyIndicator, view.headerStatus)),
-	)
-	actions := container.NewHBox(statusGroup, view.printButton)
-	headerContent := container.NewBorder(nil, nil, brandGroup, actions, nil)
-	headerFrame := container.NewGridWrap(fyne.NewSize(ui.contentWidth, 44), headerContent)
+	statusHalo := canvas.NewCircle(color.NRGBA{R: 0x83, G: 0xa8, B: 0x31, A: 30})
+	readyIndicator := container.NewGridWrap(fyne.NewSize(24, 24), container.NewStack(statusHalo, container.NewPadded(view.headerStatusDot)))
+	view.headerStatus = canvasText("Bereit", 16, appPalette.textSecondary, true)
+	statusGroup := container.NewGridWrap(fyne.NewSize(170, 54), container.NewCenter(container.NewHBox(readyIndicator, view.headerStatus)))
+	actions := container.NewHBox(statusGroup, horizontalGap(8), container.NewGridWrap(fyne.NewSize(54, 54), view.printButton))
+	headerContent := container.NewBorder(nil, nil, container.NewCenter(brandGroup), container.NewCenter(actions), nil)
+	headerFrame := container.NewGridWrap(fyne.NewSize(ui.contentWidth, 112), headerContent)
 
 	separator := canvas.NewRectangle(appPalette.border)
 	separator.SetMinSize(fyne.NewSize(1, 1))
-	return container.NewVBox(container.NewCenter(headerFrame), separator)
+	return container.NewVBox(headerFrame, separator)
 }
 
 func buildForm(view *referenceView) fyne.CanvasObject {
 	stepCircle := canvas.NewCircle(color.Transparent)
 	stepCircle.StrokeColor = appPalette.accent
 	stepCircle.StrokeWidth = 1
-	stepNumber := canvasText("01", 9, appPalette.accent, true)
+	stepNumber := canvasText("01", 12, appPalette.accent, true)
 	step := container.NewHBox(
-		container.NewGridWrap(fyne.NewSize(30, 30), container.NewStack(stepCircle, container.NewCenter(stepNumber))),
-		canvasText("LIEFERMENGE", 10, appPalette.accent, true),
+		container.NewGridWrap(fyne.NewSize(42, 42), container.NewStack(stepCircle, container.NewCenter(stepNumber))),
+		horizontalGap(10),
+		canvasText("L I E F E R M E N G E", 13, appPalette.accent, true),
 	)
 
 	title := container.NewVBox(
-		canvasText(titleForMode(view.mode)+".", 40, appPalette.textPrimary, true),
-		canvasText("Einfach berechnet.", 40, appPalette.textPrimary, true),
+		canvasText(titleForMode(view.mode)+".", 48, appPalette.textPrimary, true),
+		canvasText("Einfach berechnet.", 48, appPalette.textPrimary, true),
 	)
 	description := container.NewVBox(
-		canvasText("Menge eingeben und CO2-Ausstoß, Energiegehalt", 13, appPalette.textSecondary, false),
-		canvasText("sowie Kostenanteil auf einen Blick erhalten.", 13, appPalette.textSecondary, false),
+		canvasText("Menge eingeben und CO₂-Ausstoß, Energiegehalt sowie", 17, appPalette.textSecondary, false),
+		canvasText("Kostenanteil auf einen Blick erhalten.", 17, appPalette.textSecondary, false),
 	)
 
 	view.quantityControl = newQuantityControl(view.quantityEntry, unitForMode(view.mode))
-	statusFrame := container.NewGridWrap(fyne.NewSize(390, 18), view.status)
+	statusFrame := container.NewGridWrap(fyne.NewSize(ui.contentWidth, 20), view.status)
 	return container.NewVBox(
 		step,
-		verticalGap(ui.spacingLarge),
+		verticalGap(30),
 		title,
-		verticalGap(ui.spacingMedium),
+		verticalGap(20),
 		description,
-		verticalGap(ui.spacingLarge),
-		canvasText("MENGE EINGEBEN", 10, appPalette.textSecondary, true),
-		verticalGap(ui.spacingSmall),
+		verticalGap(38),
+		canvasText("M E N G E  E I N G E B E N", 12, appPalette.textSecondary, true),
+		verticalGap(12),
 		view.quantityControl.content,
-		verticalGap(ui.spacingSmall),
+		verticalGap(8),
 		statusFrame,
-		verticalGap(ui.spacingSmall),
+		verticalGap(16),
 		container.NewHBox(view.calculateButton),
 	)
 }
 
 func buildResultCard(view *referenceView) fyne.CanvasObject {
-	label := canvasText("GESAMTEMISSIONEN", 11, appPalette.textSecondary, true)
-	view.resultBadge = canvasText("Ergebnis", 10, appPalette.textSecondary, true)
-	view.resultBadgeBackground = canvas.NewRectangle(color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 115})
-	view.resultBadgeBackground.CornerRadius = 10
+	label := canvasText("G E S A M T E M I S S I O N E N", 13, appPalette.textSecondary, true)
+	view.resultBadge = canvasText("Live-Ergebnis", 14, appPalette.textSecondary, true)
+	view.resultBadgeBackground = canvas.NewRectangle(color.Transparent)
+	view.resultBadgeBackground.CornerRadius = 22
+	view.resultBadgeBackground.StrokeColor = color.NRGBA{R: 0x62, G: 0x77, B: 0x2e, A: 90}
+	view.resultBadgeBackground.StrokeWidth = 1
 	badge := container.NewGridWrap(
-		fyne.NewSize(76, 24),
+		fyne.NewSize(136, 44),
 		container.NewStack(view.resultBadgeBackground, container.NewCenter(view.resultBadge)),
 	)
 	metrics := container.NewGridWithColumns(3,
-		resultMetric("CO2-Kostenanteil", view.costValue),
+		resultMetric("CO₂-Kostenanteil", view.costValue),
 		resultMetric("Energiegehalt", view.energyValue),
-		resultMetric("CO2 pro kWh", view.co2Value),
+		resultMetric("CO₂ pro kWh", view.co2Value),
 	)
 	separator := canvas.NewRectangle(color.NRGBA{R: 0x18, G: 0x21, B: 0x3d, A: 36})
 	separator.SetMinSize(fyne.NewSize(1, 1))
-	view.resultValueRow = container.New(&resultValueLayout{}, view.resultValue, view.resultUnit)
+	view.resultValueRow = container.NewVBox(view.resultValue, view.resultUnit)
 	cardContent := container.NewVBox(
 		container.NewBorder(nil, nil, label, badge, nil),
-		verticalGap(42),
+		verticalGap(58),
 		view.resultValueRow,
-		verticalGap(ui.spacingSmall),
+		verticalGap(18),
 		view.resultHint,
-		verticalGap(32),
+		verticalGap(42),
 		separator,
-		verticalGap(ui.spacingMedium),
+		verticalGap(28),
 		metrics,
 	)
 
 	view.resultBackground = canvas.NewImageFromResource(resultPanelResource(false))
 	view.resultBackground.FillMode = canvas.ImageFillStretch
-	card := container.NewStack(view.resultBackground, container.NewPadded(cardContent))
+	contentInset := container.NewBorder(verticalGap(42), verticalGap(42), horizontalGap(42), horizontalGap(42), cardContent)
+	card := container.NewStack(view.resultBackground, contentInset)
 	shadowImage := canvas.NewImageFromResource(resultShadowResource())
 	shadowImage.FillMode = canvas.ImageFillStretch
-	shadow := container.NewBorder(verticalGap(8), nil, horizontalGap(8), nil, shadowImage)
-	foreground := container.NewBorder(nil, verticalGap(8), nil, horizontalGap(8), card)
-	return container.NewStack(shadow, foreground)
+	return container.NewStack(shadowImage, card)
 }
 
 func (view *referenceView) calculate() {
@@ -250,17 +248,17 @@ func (view *referenceView) calculate() {
 		view.result = calculation.CalculateBriquettes(input)
 	}
 	value, unit := splitEmissions(view.result.Emissions)
+	value = formatGermanNumberString(value, 2)
 	view.resultValue.Text = value
 	view.resultValue.TextSize = resultTextSize(value)
 	view.resultUnit.Text = unit
 	view.resultHint.Text = fmt.Sprintf("Berechnet für %s %s %s", formatQuantityDisplay(input), unitForMode(view.mode), titleForMode(view.mode))
-	view.costValue.Text = view.result.EmissionCost
-	view.energyValue.Text = view.result.EnergyContent
-	view.co2Value.Text = view.result.CO2PerKWh
+	view.costValue.Text = formatMeasurement(view.result.EmissionCost, 2)
+	view.energyValue.Text = formatMeasurement(view.result.EnergyContent, 2)
+	view.co2Value.Text = formatGermanNumberString(view.result.CO2PerKWh, 4) + " kg"
 	fitDetailText(view.costValue)
 	fitDetailText(view.energyValue)
 	fitDetailText(view.co2Value)
-	view.resultBadge.Text = "Aktuell"
 	view.resultBackground.Resource = resultPanelResource(true)
 	view.printButton.Enable()
 	refreshTexts(view.resultValue, view.resultUnit, view.resultHint, view.costValue, view.energyValue, view.co2Value, view.resultBadge)
@@ -273,7 +271,7 @@ func (view *referenceView) calculate() {
 func (view *referenceView) clearResult() {
 	view.result = models.CalculationResult{}
 	view.resultValue.Text = "—"
-	view.resultValue.TextSize = 50
+	view.resultValue.TextSize = 72
 	view.resultUnit.Text = ""
 	view.resultHint.Text = "Noch keine Berechnung"
 	view.costValue.Text = "—"
@@ -282,7 +280,6 @@ func (view *referenceView) clearResult() {
 	fitDetailText(view.costValue)
 	fitDetailText(view.energyValue)
 	fitDetailText(view.co2Value)
-	view.resultBadge.Text = "Ergebnis"
 	view.resultBackground.Resource = resultPanelResource(false)
 	view.printButton.Disable()
 	refreshTexts(view.resultValue, view.resultUnit, view.resultHint, view.costValue, view.energyValue, view.co2Value, view.resultBadge)
@@ -322,7 +319,7 @@ func (view *referenceView) setHeaderStatus(message string, statusColor color.Col
 func splitEmissions(value string) (string, string) {
 	const suffix = " kg CO2"
 	if strings.HasSuffix(value, suffix) {
-		return strings.TrimSuffix(value, suffix), "kg CO2"
+		return strings.TrimSuffix(value, suffix), "kg CO₂"
 	}
 	return value, ""
 }
@@ -330,22 +327,22 @@ func splitEmissions(value string) (string, string) {
 func resultTextSize(value string) float32 {
 	switch {
 	case len(value) <= 10:
-		return 50
+		return 72
 	case len(value) <= 13:
-		return 42
+		return 62
 	default:
-		return 34
+		return 52
 	}
 }
 
 func fitDetailText(text *canvas.Text) {
 	switch {
-	case len(text.Text) <= 16:
-		text.TextSize = 14
+	case len(text.Text) <= 18:
+		text.TextSize = 18
 	case len(text.Text) <= 20:
-		text.TextSize = 12
+		text.TextSize = 16
 	default:
-		text.TextSize = 10
+		text.TextSize = 14
 	}
 }
 
@@ -365,6 +362,41 @@ func formatQuantityDisplay(value float64) string {
 	return digits + strings.ReplaceAll(decimal, ".", ",")
 }
 
+func formatMeasurement(value string, decimals int) string {
+	parts := strings.SplitN(strings.TrimSpace(value), " ", 2)
+	formatted := formatGermanNumberString(parts[0], decimals)
+	if len(parts) == 1 {
+		return formatted
+	}
+	return formatted + " " + parts[1]
+}
+
+func formatGermanNumberString(value string, decimals int) string {
+	normalized := strings.ReplaceAll(strings.TrimSpace(value), ".", "")
+	normalized = strings.ReplaceAll(normalized, ",", ".")
+	number, err := strconv.ParseFloat(normalized, 64)
+	if err != nil {
+		return value
+	}
+	factor := math.Pow10(decimals)
+	number = math.Round((number+math.Copysign(1e-9, number))*factor) / factor
+	formatted := strconv.FormatFloat(number, 'f', decimals, 64)
+	parts := strings.SplitN(formatted, ".", 2)
+	integer := parts[0]
+	sign := ""
+	if strings.HasPrefix(integer, "-") {
+		sign = "-"
+		integer = strings.TrimPrefix(integer, "-")
+	}
+	for index := len(integer) - 3; index > 0; index -= 3 {
+		integer = integer[:index] + "." + integer[index:]
+	}
+	if len(parts) == 1 || decimals == 0 {
+		return sign + integer
+	}
+	return sign + integer + "," + parts[1]
+}
+
 func titleForMode(mode string) string {
 	if mode == "oil" {
 		return "Heizöl"
@@ -380,13 +412,13 @@ func unitForMode(mode string) string {
 }
 
 func detailValue(value string) *canvas.Text {
-	return canvasText(value, 14, appPalette.textPrimary, true)
+	return canvasText(value, 18, appPalette.textPrimary, true)
 }
 
 func resultMetric(label string, value *canvas.Text) fyne.CanvasObject {
 	return container.NewVBox(
-		canvasText(label, 10, appPalette.textSecondary, false),
-		verticalGap(ui.spacingSmall),
+		canvasText(label, 13, appPalette.textSecondary, false),
+		verticalGap(16),
 		value,
 	)
 }

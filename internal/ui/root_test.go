@@ -29,7 +29,7 @@ func TestReferenceViewCalculatesBothModesAndPrints(t *testing.T) {
 	oilView := buildReferenceView(window, "oil")
 	oilView.quantityEntry.SetText("10.0")
 	test.Tap(oilView.calculateButton)
-	if oilView.resultValue.Text != "26,76" || oilView.resultUnit.Text != "kg CO2" {
+	if oilView.resultValue.Text != "26,76" || oilView.resultUnit.Text != "kg CO₂" {
 		t.Fatalf("unexpected oil result: %s", oilView.resultValue.Text)
 	}
 	if oilView.headerStatus.Text != "Berechnet" || !oilView.result.Valid {
@@ -46,7 +46,7 @@ func TestReferenceViewCalculatesBothModesAndPrints(t *testing.T) {
 	briquettesView := buildReferenceView(window, "briketts")
 	briquettesView.quantityEntry.SetText("1,5")
 	briquettesView.quantityEntry.OnSubmitted(briquettesView.quantityEntry.Text)
-	if briquettesView.resultValue.Text != "2827,20" || briquettesView.resultUnit.Text != "kg CO2" {
+	if briquettesView.resultValue.Text != "2.827,20" || briquettesView.resultUnit.Text != "kg CO₂" {
 		t.Fatalf("unexpected briquettes result after enter: %s", briquettesView.resultValue.Text)
 	}
 }
@@ -78,8 +78,12 @@ func TestCustomControlsSupportKeyboardActivation(t *testing.T) {
 	action.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
 	navigation := newFuelNavigationButton("oil", "Heizöl", false, func() { activated++ })
 	navigation.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
-	if activated != 2 {
-		t.Fatalf("expected two keyboard activations, got %d", activated)
+	print := newCircleIconButton(printIconResource(), func() { activated++ })
+	print.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+	print.Disable()
+	print.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+	if activated != 3 {
+		t.Fatalf("expected three keyboard activations, got %d", activated)
 	}
 }
 
@@ -97,11 +101,20 @@ func TestFormatQuantityDisplay(t *testing.T) {
 }
 
 func TestResultTextSizeAdaptsToLongValues(t *testing.T) {
-	if resultTextSize("33.036,05") != 50 {
+	if resultTextSize("33.036,05") != 72 {
 		t.Fatal("expected regular result size")
 	}
-	if resultTextSize("1.234.567,89") >= 50 {
+	if resultTextSize("1.234.567,89") >= 72 {
 		t.Fatal("expected long result to use a smaller size")
+	}
+}
+
+func TestGermanResultFormattingMatchesReference(t *testing.T) {
+	if actual := formatGermanNumberString("33036,05", 2); actual != "33.036,05" {
+		t.Fatalf("unexpected emission format: %s", actual)
+	}
+	if actual := formatMeasurement("124009,295 kWh", 2); actual != "124.009,30 kWh" {
+		t.Fatalf("unexpected energy format: %s", actual)
 	}
 }
 
@@ -110,6 +123,9 @@ func TestReferenceViewFitsTargetWindow(t *testing.T) {
 	defer app.Quit()
 	window := app.NewWindow("test")
 	view := buildReferenceView(window, "oil")
+	if view.scroll == nil {
+		t.Fatal("expected the long reference layout to be vertically scrollable")
+	}
 	window.SetContent(view.content)
 	window.Resize(fyne.NewSize(1080, 650))
 

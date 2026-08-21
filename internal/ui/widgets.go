@@ -79,11 +79,11 @@ func (button *actionButton) CreateRenderer() fyne.WidgetRenderer {
 	renderer := &actionButtonRenderer{
 		button:     button,
 		background: canvas.NewRectangle(appPalette.textPrimary),
-		label:      canvasText(button.text, 13, appPalette.white, true),
+		label:      canvasText(button.text, 17, appPalette.white, true),
 		arrowDisk:  canvas.NewCircle(appPalette.resultSurface),
 		arrow:      canvas.NewImageFromResource(arrowIconResource()),
 	}
-	renderer.background.CornerRadius = 12
+	renderer.background.CornerRadius = 34
 	renderer.arrow.FillMode = canvas.ImageFillContain
 	renderer.objects = []fyne.CanvasObject{renderer.background, renderer.label, renderer.arrowDisk, renderer.arrow}
 	renderer.Refresh()
@@ -102,15 +102,15 @@ type actionButtonRenderer struct {
 func (renderer *actionButtonRenderer) Layout(size fyne.Size) {
 	renderer.background.Resize(size)
 	labelSize := renderer.label.MinSize()
-	renderer.label.Move(fyne.NewPos(18, (size.Height-labelSize.Height)/2))
+	renderer.label.Move(fyne.NewPos(28, (size.Height-labelSize.Height)/2))
 	renderer.label.Resize(labelSize)
-	renderer.arrowDisk.Move(fyne.NewPos(size.Width-38, (size.Height-28)/2))
-	renderer.arrowDisk.Resize(fyne.NewSize(28, 28))
-	renderer.arrow.Move(fyne.NewPos(size.Width-31, (size.Height-14)/2))
-	renderer.arrow.Resize(fyne.NewSize(14, 14))
+	renderer.arrowDisk.Move(fyne.NewPos(size.Width-58, (size.Height-42)/2))
+	renderer.arrowDisk.Resize(fyne.NewSize(42, 42))
+	renderer.arrow.Move(fyne.NewPos(size.Width-48, (size.Height-22)/2))
+	renderer.arrow.Resize(fyne.NewSize(22, 22))
 }
 
-func (renderer *actionButtonRenderer) MinSize() fyne.Size { return fyne.NewSize(178, 46) }
+func (renderer *actionButtonRenderer) MinSize() fyne.Size { return fyne.NewSize(248, 68) }
 
 func (renderer *actionButtonRenderer) Refresh() {
 	fill := appPalette.textPrimary
@@ -208,9 +208,9 @@ func (button *fuelNavigationButton) CreateRenderer() fyne.WidgetRenderer {
 		button:     button,
 		background: canvas.NewRectangle(color.Transparent),
 		icon:       canvas.NewImageFromResource(navigationIconResource(button.iconKind, button.active, false)),
-		label:      canvasText(button.label, 10, appPalette.whiteMuted, true),
+		label:      canvasText(button.label, 16, appPalette.whiteMuted, true),
 	}
-	renderer.background.CornerRadius = 17
+	renderer.background.CornerRadius = 18
 	renderer.icon.FillMode = canvas.ImageFillContain
 	renderer.objects = []fyne.CanvasObject{renderer.background, renderer.icon, renderer.label}
 	renderer.Refresh()
@@ -227,14 +227,14 @@ type fuelNavigationRenderer struct {
 
 func (renderer *fuelNavigationRenderer) Layout(size fyne.Size) {
 	renderer.background.Resize(size)
-	renderer.icon.Move(fyne.NewPos((size.Width-22)/2, 11))
-	renderer.icon.Resize(fyne.NewSize(22, 22))
+	renderer.icon.Move(fyne.NewPos(20, (size.Height-24)/2))
+	renderer.icon.Resize(fyne.NewSize(24, 24))
 	labelSize := renderer.label.MinSize()
-	renderer.label.Move(fyne.NewPos((size.Width-labelSize.Width)/2, 42))
+	renderer.label.Move(fyne.NewPos(54, (size.Height-labelSize.Height)/2))
 	renderer.label.Resize(labelSize)
 }
 
-func (renderer *fuelNavigationRenderer) MinSize() fyne.Size { return fyne.NewSize(66, 66) }
+func (renderer *fuelNavigationRenderer) MinSize() fyne.Size { return fyne.NewSize(136, 62) }
 
 func (renderer *fuelNavigationRenderer) Refresh() {
 	background := color.Color(color.Transparent)
@@ -268,6 +268,137 @@ func (renderer *fuelNavigationRenderer) Refresh() {
 func (renderer *fuelNavigationRenderer) Objects() []fyne.CanvasObject { return renderer.objects }
 func (renderer *fuelNavigationRenderer) Destroy()                     {}
 
+type circleIconButton struct {
+	widget.BaseWidget
+	icon     fyne.Resource
+	onTapped func()
+	hovered  bool
+	pressed  bool
+	focused  bool
+	disabled bool
+}
+
+func newCircleIconButton(icon fyne.Resource, onTapped func()) *circleIconButton {
+	button := &circleIconButton{icon: icon, onTapped: onTapped}
+	button.ExtendBaseWidget(button)
+	return button
+}
+
+func (button *circleIconButton) Tapped(*fyne.PointEvent) {
+	if !button.disabled && button.onTapped != nil {
+		button.onTapped()
+	}
+}
+
+func (button *circleIconButton) MouseIn(*desktop.MouseEvent) {
+	button.hovered = true
+	button.Refresh()
+}
+
+func (button *circleIconButton) MouseMoved(*desktop.MouseEvent) {}
+
+func (button *circleIconButton) MouseOut() {
+	button.hovered = false
+	button.pressed = false
+	button.Refresh()
+}
+
+func (button *circleIconButton) MouseDown(event *desktop.MouseEvent) {
+	if !button.disabled && event.Button == desktop.MouseButtonPrimary {
+		button.pressed = true
+		button.Refresh()
+	}
+}
+
+func (button *circleIconButton) MouseUp(*desktop.MouseEvent) {
+	button.pressed = false
+	button.Refresh()
+}
+
+func (button *circleIconButton) FocusGained() {
+	button.focused = true
+	fyne.Do(button.Refresh)
+}
+
+func (button *circleIconButton) FocusLost() {
+	button.focused = false
+	fyne.Do(button.Refresh)
+}
+
+func (button *circleIconButton) TypedRune(rune) {}
+
+func (button *circleIconButton) TypedKey(event *fyne.KeyEvent) {
+	if event.Name == fyne.KeyEnter || event.Name == fyne.KeyReturn || event.Name == fyne.KeySpace {
+		button.Tapped(nil)
+	}
+}
+
+func (button *circleIconButton) Disable() {
+	button.disabled = true
+	button.Refresh()
+}
+
+func (button *circleIconButton) Enable() {
+	button.disabled = false
+	button.Refresh()
+}
+
+func (button *circleIconButton) Disabled() bool { return button.disabled }
+
+func (button *circleIconButton) CreateRenderer() fyne.WidgetRenderer {
+	background := canvas.NewCircle(color.Transparent)
+	background.StrokeColor = appPalette.border
+	background.StrokeWidth = 1
+	icon := canvas.NewImageFromResource(button.icon)
+	icon.FillMode = canvas.ImageFillContain
+	renderer := &circleIconButtonRenderer{button: button, background: background, icon: icon}
+	renderer.objects = []fyne.CanvasObject{background, icon}
+	renderer.Refresh()
+	return renderer
+}
+
+type circleIconButtonRenderer struct {
+	button     *circleIconButton
+	background *canvas.Circle
+	icon       *canvas.Image
+	objects    []fyne.CanvasObject
+}
+
+func (renderer *circleIconButtonRenderer) Layout(size fyne.Size) {
+	renderer.background.Resize(size)
+	renderer.icon.Move(fyne.NewPos((size.Width-24)/2, (size.Height-24)/2))
+	renderer.icon.Resize(fyne.NewSize(24, 24))
+}
+
+func (renderer *circleIconButtonRenderer) MinSize() fyne.Size { return fyne.NewSize(54, 54) }
+
+func (renderer *circleIconButtonRenderer) Refresh() {
+	fill := color.Color(color.Transparent)
+	if renderer.button.hovered && !renderer.button.disabled {
+		fill = appPalette.surface
+	}
+	if renderer.button.pressed && !renderer.button.disabled {
+		fill = appPalette.accentSoft
+	}
+	renderer.background.FillColor = fill
+	renderer.background.StrokeColor = appPalette.border
+	if renderer.button.focused {
+		renderer.background.StrokeColor = appPalette.accent
+		renderer.background.StrokeWidth = 2
+	} else {
+		renderer.background.StrokeWidth = 1
+	}
+	renderer.icon.Translucency = 0
+	if renderer.button.disabled {
+		renderer.icon.Translucency = 0.55
+	}
+	canvas.Refresh(renderer.background)
+	renderer.icon.Refresh()
+}
+
+func (renderer *circleIconButtonRenderer) Objects() []fyne.CanvasObject { return renderer.objects }
+func (renderer *circleIconButtonRenderer) Destroy()                     {}
+
 type focusEntry struct {
 	widget.Entry
 	onFocusChanged func(bool)
@@ -294,23 +425,26 @@ func (entry *focusEntry) FocusLost() {
 }
 
 type quantityControl struct {
-	content    fyne.CanvasObject
-	background *canvas.Rectangle
-	unit       *canvas.Text
-	focused    bool
-	invalid    bool
+	content   fyne.CanvasObject
+	underline *canvas.Rectangle
+	unit      *canvas.Text
+	focused   bool
+	invalid   bool
 }
 
 func newQuantityControl(entry *focusEntry, unitValue string) *quantityControl {
 	control := &quantityControl{}
-	control.unit = canvasText(unitValue, 12, appPalette.accent, true)
-	unitBackground := canvas.NewRectangle(appPalette.accentSoft)
-	unitBackground.CornerRadius = 8
-	unitPill := container.NewGridWrap(fyne.NewSize(76, 36), container.NewStack(unitBackground, container.NewCenter(control.unit)))
-	control.background = canvas.NewRectangle(appPalette.surface)
-	control.background.CornerRadius = 11
-	inputContent := container.NewBorder(nil, nil, nil, unitPill, entry)
-	control.content = container.NewStack(control.background, container.NewPadded(inputContent))
+	entry.TextStyle = fyne.TextStyle{Bold: true}
+	entry.Scroll = fyne.ScrollNone
+	control.unit = canvasText(unitValue, 18, appPalette.accent, true)
+	unitFrame := container.NewGridWrap(fyne.NewSize(110, 54), container.NewCenter(control.unit))
+	inputContent := container.NewBorder(nil, nil, nil, unitFrame, entry)
+	control.underline = canvas.NewRectangle(appPalette.textPrimary)
+	control.underline.SetMinSize(fyne.NewSize(1, 3))
+	control.content = container.NewVBox(
+		container.NewGridWrap(fyne.NewSize(ui.contentWidth, 58), inputContent),
+		control.underline,
+	)
 	control.refreshBorder()
 	entry.onFocusChanged = control.SetFocused
 	return control
@@ -327,15 +461,12 @@ func (control *quantityControl) SetError(invalid bool) {
 }
 
 func (control *quantityControl) refreshBorder() {
-	control.background.StrokeColor = appPalette.border
-	control.background.StrokeWidth = 1
+	control.underline.FillColor = appPalette.textPrimary
 	if control.focused {
-		control.background.StrokeColor = appPalette.accent
-		control.background.StrokeWidth = 2
+		control.underline.FillColor = appPalette.accent
 	}
 	if control.invalid {
-		control.background.StrokeColor = appPalette.error
-		control.background.StrokeWidth = 2
+		control.underline.FillColor = appPalette.error
 	}
-	canvas.Refresh(control.background)
+	canvas.Refresh(control.underline)
 }
