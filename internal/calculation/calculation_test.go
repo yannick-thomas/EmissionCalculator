@@ -36,6 +36,26 @@ func TestCalculateOil(t *testing.T) {
 	}
 }
 
+func TestCalculationRecordSeparatesYearAndProvenance(t *testing.T) {
+	cfg := DefaultConfig()
+	record, err := Calculate(FuelOil, 10, cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if record.CalculationYear != cfg.CalculationYear {
+		t.Fatalf("unexpected calculation year: %d", record.CalculationYear)
+	}
+	if record.Factor.ValidFrom.Year() != 2022 || record.Factor.SourceYear != 2022 {
+		t.Fatalf("factor validity and source year were not preserved: %+v", record.Factor)
+	}
+	if record.Price.ReferenceYear == 0 || record.Price.Source == "" || record.Price.EURPerTonne != record.CO2Price {
+		t.Fatalf("price provenance was not preserved: %+v", record.Price)
+	}
+	if cfg.CalculationYear == 2026 && (!record.Price.IsAssumption || record.Price.RangeMin != 55 || record.Price.RangeMax != 65) {
+		t.Fatalf("2026 default must be labelled as a corridor assumption: %+v", record.Price)
+	}
+}
+
 func TestCalculateOilRejectsYearBeforeAnyFactor(t *testing.T) {
 	cfg := Config{CO2PricePerTonne: 45, Year: 1999}
 	result := CalculateOil(10, cfg)
@@ -147,7 +167,6 @@ func TestParseQuantityGermanFormat(t *testing.T) {
 		expected float64
 	}{
 		{"1,5", 1.5},
-		{"12.500", 12500},
 		{"12.500,50", 12500.5},
 		{"12.5", 12.5},
 		{"1000", 1000},

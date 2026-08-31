@@ -23,12 +23,13 @@ type FuelFactor struct {
 	Density        float64 // kg/L (0 for mass-based fuels)
 	EmissionFactor float64 // kg CO₂/MJ
 	Source         string
+	SourceYear     int
 	ValidFrom      time.Time
 }
 
 // factorHistory holds every known factor version per fuel, in no particular order.
 // Append new entries when official emission factors are revised; never mutate existing ones,
-// so that past calculations stay reproducible from their recorded FactorYear.
+// so that past calculations stay reproducible from their recorded calculation year.
 var factorHistory = map[FuelType][]FuelFactor{
 	FuelOil: {
 		{
@@ -38,6 +39,7 @@ var factorHistory = map[FuelType][]FuelFactor{
 			Density:        0.845,
 			EmissionFactor: 0.074,
 			Source:         "UBA 2022, DIN 51603-1",
+			SourceYear:     2022,
 			ValidFrom:      time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 	},
@@ -48,6 +50,7 @@ var factorHistory = map[FuelType][]FuelFactor{
 			CalorificValue: 19.0,
 			EmissionFactor: 0.0992,
 			Source:         "UBA 2022",
+			SourceYear:     2022,
 			ValidFrom:      time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 	},

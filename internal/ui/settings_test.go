@@ -17,10 +17,11 @@ func TestSettingsStorePersistsAndResetsCO2Price(t *testing.T) {
 	defer app.Quit()
 	preferences := app.Preferences()
 	preferences.RemoveValue(co2PricePreferenceKey)
-	preferences.RemoveValue(factorYearPreferenceKey)
+	preferences.RemoveValue(calculationYearPreferenceKey)
 
 	store := newSettingsStore(preferences)
-	if store.Config().CO2PricePerTonne != 45 {
+	defaultPrice := calculation.DefaultConfig().CO2PricePerTonne
+	if store.Config().CO2PricePerTonne != defaultPrice {
 		t.Fatalf("unexpected default price: %v", store.Config().CO2PricePerTonne)
 	}
 
@@ -31,10 +32,10 @@ func TestSettingsStorePersistsAndResetsCO2Price(t *testing.T) {
 	}
 
 	reloaded.Reset()
-	if reloaded.Config().CO2PricePerTonne != 45 {
+	if reloaded.Config().CO2PricePerTonne != defaultPrice {
 		t.Fatalf("expected reset default price, got %v", reloaded.Config().CO2PricePerTonne)
 	}
-	if newSettingsStore(preferences).Config().CO2PricePerTonne != 45 {
+	if newSettingsStore(preferences).Config().CO2PricePerTonne != defaultPrice {
 		t.Fatal("expected reset to remove the persisted override")
 	}
 }
@@ -44,12 +45,13 @@ func TestSettingsPanelValidatesAndAppliesSharedPrice(t *testing.T) {
 	defer app.Quit()
 	app.Preferences().RemoveValue(co2PricePreferenceKey)
 	store := newSettingsStore(app.Preferences())
+	defaultPrice := calculation.DefaultConfig().CO2PricePerTonne
 	saved := 0
 	panel := newSettingsPanel(store, func() { saved++ })
 
 	panel.priceEntry.SetText("ungültig")
 	panel.apply()
-	if !panel.priceControl.invalid || saved != 0 || store.Config().CO2PricePerTonne != 45 {
+	if !panel.priceControl.invalid || saved != 0 || store.Config().CO2PricePerTonne != defaultPrice {
 		t.Fatal("expected invalid settings to be rejected")
 	}
 
@@ -62,7 +64,7 @@ func TestSettingsPanelValidatesAndAppliesSharedPrice(t *testing.T) {
 	panel = newSettingsPanel(store, func() { saved++ })
 	panel.restoreDefault()
 	panel.apply()
-	if saved != 2 || store.Config().CO2PricePerTonne != 45 {
+	if saved != 2 || store.Config().CO2PricePerTonne != defaultPrice {
 		t.Fatal("expected the default action to restore the central default")
 	}
 	if persisted := app.Preferences().FloatWithFallback(co2PricePreferenceKey, -1); persisted != -1 {
@@ -100,39 +102,39 @@ func TestFormatSettingsValue(t *testing.T) {
 	}
 }
 
-func TestSettingsStorePersistsAndResetsFactorYear(t *testing.T) {
+func TestSettingsStorePersistsAndResetsCalculationYear(t *testing.T) {
 	app := test.NewApp()
 	defer app.Quit()
 	preferences := app.Preferences()
-	preferences.RemoveValue(factorYearPreferenceKey)
-	defaultYear := calculation.DefaultConfig().Year
+	preferences.RemoveValue(calculationYearPreferenceKey)
+	defaultYear := calculation.DefaultConfig().CalculationYear
 
 	store := newSettingsStore(preferences)
-	if store.Config().Year != defaultYear {
-		t.Fatalf("unexpected default year: %v", store.Config().Year)
+	if store.Config().CalculationYear != defaultYear {
+		t.Fatalf("unexpected default year: %v", store.Config().CalculationYear)
 	}
 
 	availableYears := calculation.AvailableYears()
 	if len(availableYears) == 0 {
 		t.Fatal("expected at least one available year")
 	}
-	store.SetFactorYear(availableYears[0])
+	store.SetCalculationYear(availableYears[0])
 	reloaded := newSettingsStore(preferences)
-	if reloaded.Config().Year != availableYears[0] {
-		t.Fatalf("expected persisted year, got %v", reloaded.Config().Year)
+	if reloaded.Config().CalculationYear != availableYears[0] {
+		t.Fatalf("expected persisted year, got %v", reloaded.Config().CalculationYear)
 	}
 
 	reloaded.Reset()
-	if reloaded.Config().Year != defaultYear {
-		t.Fatalf("expected reset default year, got %v", reloaded.Config().Year)
+	if reloaded.Config().CalculationYear != defaultYear {
+		t.Fatalf("expected reset default year, got %v", reloaded.Config().CalculationYear)
 	}
 }
 
-func TestSettingsPanelAppliesSelectedFactorYear(t *testing.T) {
+func TestSettingsPanelAppliesSelectedCalculationYear(t *testing.T) {
 	app := test.NewApp()
 	defer app.Quit()
 	app.Preferences().RemoveValue(co2PricePreferenceKey)
-	app.Preferences().RemoveValue(factorYearPreferenceKey)
+	app.Preferences().RemoveValue(calculationYearPreferenceKey)
 	store := newSettingsStore(app.Preferences())
 	panel := newSettingsPanel(store, func() {})
 
@@ -140,8 +142,8 @@ func TestSettingsPanelAppliesSelectedFactorYear(t *testing.T) {
 	targetYear := availableYears[len(availableYears)-1]
 	panel.yearSelect.SetSelected(strconv.Itoa(targetYear))
 	panel.apply()
-	if store.Config().Year != targetYear {
-		t.Fatalf("expected the selected year to be applied, got %v", store.Config().Year)
+	if store.Config().CalculationYear != targetYear {
+		t.Fatalf("expected the selected year to be applied, got %v", store.Config().CalculationYear)
 	}
 }
 

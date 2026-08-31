@@ -2,6 +2,7 @@ package ui
 
 import (
 	"math"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -185,9 +186,10 @@ func TestResultUsesCompleteUnitsAndCalculationBasis(t *testing.T) {
 	if !strings.Contains(view.costValue.Text, "€ brutto") {
 		t.Fatalf("expected gross cost unit, got %q", view.costValue.Text)
 	}
-	for _, expected := range []string{"Emissionsfaktor:", "CO₂-Preis:", "Umsatzsteuer:", "Faktorjahr:"} {
-		if !strings.Contains(view.resultBasis.Text, expected) {
-			t.Fatalf("missing calculation basis %q in %q", expected, view.resultBasis.Text)
+	joinedBasis := strings.Join(view.resultBasis.values(), "|")
+	for _, expected := range []string{"kg CO₂/MJ", "€/t", "2022", strconv.Itoa(view.result.CalculationYear)} {
+		if !strings.Contains(joinedBasis, expected) {
+			t.Fatalf("missing calculation basis %q in %q", expected, joinedBasis)
 		}
 	}
 }

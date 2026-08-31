@@ -61,7 +61,7 @@ func csvColumnIndexes(header []string) (fuelIdx, quantityIdx int, err error) {
 func ExportCSV(w io.Writer, records []models.CalculationRecord) error {
 	writer := csv.NewWriter(w)
 	defer writer.Flush()
-	header := []string{"fuel", "quantity", "unit", "emissions_kg", "cost_eur", "energy_kwh", "co2_per_kwh", "factor_year", "audit_hash"}
+	header := []string{"fuel", "quantity", "unit", "emissions_kg", "cost_eur", "energy_kwh", "co2_per_kwh", "calculation_year", "price_reference_year", "factor_valid_from", "factor_source_year", "audit_hash"}
 	if err := writer.Write(header); err != nil {
 		return fmt.Errorf("csv schreiben: %w", err)
 	}
@@ -74,7 +74,10 @@ func ExportCSV(w io.Writer, records []models.CalculationRecord) error {
 			strconv.FormatFloat(r.EmissionCost, 'f', 2, 64),
 			strconv.FormatFloat(float64(r.EnergyContent), 'f', 2, 64),
 			strconv.FormatFloat(r.CO2PerKWh, 'f', 4, 64),
-			strconv.Itoa(r.FactorYear),
+			strconv.Itoa(r.CalculationYear),
+			strconv.Itoa(r.Price.ReferenceYear),
+			r.Factor.ValidFrom.Format("2006-01-02"),
+			strconv.Itoa(r.Factor.SourceYear),
 			r.AuditHash,
 		}
 		if err := writer.Write(row); err != nil {

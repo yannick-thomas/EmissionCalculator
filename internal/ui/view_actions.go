@@ -48,9 +48,8 @@ func (view *referenceView) calculate() {
 	view.resultBadge.Text = "Berechnet"
 	view.resultBadge.Color = appPalette.textSecondary
 	view.resultBadgeBackground.StrokeColor = color.NRGBA{R: 0x62, G: 0x77, B: 0x2e, A: 90}
-	view.resultBasis.Text = basisTextForRecord(view.result)
-	view.resultBasis.Color = appPalette.textMuted
-	refreshTexts(view.resultValue, view.resultUnit, view.resultHint, view.costValue, view.energyValue, view.co2Value, view.resultBadge, view.resultBasis)
+	view.resultBasis.SetRecord(view.result)
+	refreshTexts(view.resultValue, view.resultUnit, view.resultHint, view.costValue, view.energyValue, view.co2Value, view.resultBadge)
 	view.resultValueRow.Refresh()
 	view.resultBackground.Refresh()
 	canvas.Refresh(view.resultBadgeBackground)
@@ -99,9 +98,8 @@ func (view *referenceView) clearResult() {
 	view.scenarioButton.Disable()
 	view.resultBadge.Color = color.Transparent
 	view.resultBadgeBackground.StrokeColor = color.Transparent
-	view.resultBasis.Text = ""
-	view.resultBasis.Color = color.Transparent
-	refreshTexts(view.resultValue, view.resultUnit, view.resultHint, view.costValue, view.energyValue, view.co2Value, view.resultBadge, view.resultBasis)
+	view.resultBasis.Clear()
+	refreshTexts(view.resultValue, view.resultUnit, view.resultHint, view.costValue, view.energyValue, view.co2Value, view.resultBadge)
 	view.resultValueRow.Refresh()
 	view.resultBackground.Refresh()
 	canvas.Refresh(view.resultBadgeBackground)

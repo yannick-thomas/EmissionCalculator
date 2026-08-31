@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"emissioncalculator/internal/models"
 	"fmt"
 	"math"
 	"strconv"
@@ -92,10 +91,4 @@ func unitForMode(mode string) string {
 		return "Liter"
 	}
 	return "Tonnen"
-}
-
-// basisTextForRecord builds the calculation basis shown beneath the result card.
-func basisTextForRecord(r models.CalculationRecord) string {
-	ef := formatFloat(r.Factor.EmissionFactor, 4)
-	return "Emissionsfaktor: " + ef + " kg CO₂/MJ\nCO₂-Preis: " + formatFloat(r.CO2Price, 2) + " €/t\nUmsatzsteuer: 19 %\nFaktorjahr: " + strconv.Itoa(r.FactorYear)
 }

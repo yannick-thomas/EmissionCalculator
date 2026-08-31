@@ -56,7 +56,7 @@ type referenceView struct {
 	costValue             *canvas.Text
 	energyValue           *canvas.Text
 	co2Value              *canvas.Text
-	resultBasis           *canvas.Text
+	resultBasis           *calculationBasis
 	configProvider        func() calculation.Config
 	state                 resultState
 }

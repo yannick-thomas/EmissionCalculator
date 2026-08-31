@@ -4,21 +4,26 @@ import "testing"
 
 func sampleRecord() CalculationRecord {
 	return CalculationRecord{
-		Valid:         true,
-		FuelType:      "oil",
-		Quantity:      10,
-		Unit:          "L",
-		Emissions:     KgCO2(26.76),
-		EmissionCost:  1.43,
-		EnergyContent: KWh(100.45),
-		CO2PerKWh:     0.2664,
-		CO2Price:      45,
-		FactorYear:    2026,
+		Valid:           true,
+		FuelType:        "oil",
+		Quantity:        10,
+		Unit:            "L",
+		Emissions:       KgCO2(26.76),
+		EmissionCost:    1.43,
+		EnergyContent:   KWh(100.45),
+		CO2PerKWh:       0.2664,
+		CO2Price:        45,
+		CalculationYear: 2026,
+		FactorYear:      2026,
+		Price: PriceSnapshot{
+			EURPerTonne: 45, ReferenceYear: 2024, Source: "Bundesregierung / BEHG",
+		},
 		Factor: FactorSnapshot{
 			CalorificValue: 42.8,
 			Density:        0.845,
 			EmissionFactor: 0.074,
 			Source:         "UBA 2022, DIN 51603-1",
+			SourceYear:     2022,
 		},
 		Source:     "UBA 2022, DIN 51603-1",
 		AppVersion: "test",
@@ -44,5 +49,16 @@ func TestComputeAuditHashChangesWithInputs(t *testing.T) {
 
 	if ComputeAuditHash(base) == ComputeAuditHash(changed) {
 		t.Fatal("expected a different quantity to produce a different audit hash")
+	}
+}
+
+func TestComputeAuditHashIncludesPriceProvenance(t *testing.T) {
+	base := sampleRecord()
+	changed := base
+	changed.Price.Source = "Manuelle Preisannahme"
+	changed.Price.IsAssumption = true
+
+	if ComputeAuditHash(base) == ComputeAuditHash(changed) {
+		t.Fatal("expected changed price provenance to produce a different audit hash")
 	}
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // showScenarioDialog compares the current result's CO2 price against a lower and higher
-// assumption for the same fuel, quantity, and factor year — useful for Beratung/Angebotsvergleich.
+// assumption for the same fuel, quantity, and calculation year — useful for Beratung/Angebotsvergleich.
 func showScenarioDialog(view *referenceView) {
 	cfg := calculation.DefaultConfig()
 	if view.configProvider != nil {
@@ -43,7 +43,7 @@ func showScenarioDialog(view *referenceView) {
 	for _, record := range records {
 		rows.Add(container.NewGridWithColumns(4,
 			canvasText(record.ScenarioLabel, 13, appPalette.textPrimary, false),
-			canvasText(strconv.Itoa(record.FactorYear), 13, appPalette.textPrimary, false),
+			canvasText(strconv.Itoa(record.CalculationYear), 13, appPalette.textPrimary, false),
 			canvasText(formatFloat(record.CO2Price, 2)+" €/t", 13, appPalette.textPrimary, false),
 			canvasText(formatFloat(record.EmissionCost, 2)+" €", 13, appPalette.textPrimary, false),
 		))

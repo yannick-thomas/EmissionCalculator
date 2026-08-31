@@ -3,23 +3,34 @@ package models
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
+	"encoding/json"
 )
 
 // ComputeAuditHash derives a deterministic fingerprint over a record's inputs, results, and the
 // exact factor set applied. It exists for internal traceability (e.g. "which exact factors and
 // app version produced this number") and is not a legal or regulatory certification.
 func ComputeAuditHash(r CalculationRecord) string {
-	canonical := fmt.Sprintf(
-		"%s|%.6f|%s|%.6f|%.6f|%.6f|%.6f|%.6f|%d|%.6f|%.6f|%.6f|%s|%s|%s|%s",
-		r.FuelType, r.Quantity, r.Unit,
-		float64(r.Emissions), r.EmissionCost, float64(r.EnergyContent), r.CO2PerKWh, r.CO2Price,
-		r.FactorYear, r.Factor.CalorificValue, r.Factor.Density, r.Factor.EmissionFactor,
-		r.Factor.ValidFrom.UTC().Format("2006-01-02"),
-		r.AppVersion,
-		r.ComputedAt.UTC().Format("2006-01-02T15:04:05.000000000Z07:00"),
-		r.Source,
-	)
-	sum := sha256.Sum256([]byte(canonical))
+	canonical, _ := json.Marshal(struct {
+		FuelType        string
+		Quantity        float64
+		Unit            string
+		Emissions       KgCO2
+		EmissionCost    float64
+		EnergyContent   KWh
+		CO2PerKWh       float64
+		CalculationYear int
+		Price           PriceSnapshot
+		Factor          FactorSnapshot
+		AppVersion      string
+		ComputedAt      string
+	}{
+		FuelType: r.FuelType, Quantity: r.Quantity, Unit: r.Unit,
+		Emissions: r.Emissions, EmissionCost: r.EmissionCost,
+		EnergyContent: r.EnergyContent, CO2PerKWh: r.CO2PerKWh,
+		CalculationYear: r.CalculationYear, Price: r.Price, Factor: r.Factor,
+		AppVersion: r.AppVersion,
+		ComputedAt: r.ComputedAt.UTC().Format("2006-01-02T15:04:05.000000000Z07:00"),
+	})
+	sum := sha256.Sum256(canonical)
 	return hex.EncodeToString(sum[:])
 }

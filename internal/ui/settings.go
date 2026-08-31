@@ -14,7 +14,9 @@ import (
 )
 
 const co2PricePreferenceKey = "calculation.co2_price_per_tonne"
-const factorYearPreferenceKey = "calculation.factor_year"
+
+// The persisted key keeps its historic name so existing user settings survive the terminology fix.
+const calculationYearPreferenceKey = "calculation.factor_year"
 
 type settingsStore struct {
 	preferences fyne.Preferences
@@ -24,20 +26,26 @@ type settingsStore struct {
 func newSettingsStore(preferences fyne.Preferences) *settingsStore {
 	defaults := calculation.DefaultConfig()
 	price := defaults.CO2PricePerTonne
-	year := defaults.Year
+	year := defaults.CalculationYear
 	if preferences != nil {
 		price = preferences.FloatWithFallback(co2PricePreferenceKey, price)
-		year = preferences.IntWithFallback(factorYearPreferenceKey, year)
+		year = preferences.IntWithFallback(calculationYearPreferenceKey, year)
 	}
 	if price <= 0 {
 		price = defaults.CO2PricePerTonne
 	}
 	if !isAvailableYear(year) {
-		year = defaults.Year
+		year = defaults.CalculationYear
+	}
+	config := defaults
+	config.CalculationYear = year
+	config.Year = year
+	if price != defaults.CO2PricePerTonne {
+		config = config.WithCO2Price(price, "Manuelle Preisannahme")
 	}
 	return &settingsStore{
 		preferences: preferences,
-		config:      calculation.Config{CO2PricePerTonne: price, Year: year},
+		config:      config,
 	}
 }
 
@@ -46,16 +54,20 @@ func (store *settingsStore) Config() calculation.Config {
 }
 
 func (store *settingsStore) SetCO2Price(price float64) {
-	store.config.CO2PricePerTonne = price
+	store.config = store.config.WithCO2Price(price, "Manuelle Preisannahme")
 	if store.preferences != nil {
 		store.preferences.SetFloat(co2PricePreferenceKey, price)
 	}
 }
 
-func (store *settingsStore) SetFactorYear(year int) {
+func (store *settingsStore) SetCalculationYear(year int) {
+	store.config.CalculationYear = year
 	store.config.Year = year
+	if store.config.PriceReference.Source == "Manuelle Preisannahme" {
+		store.config = store.config.WithCO2Price(store.config.CO2PricePerTonne, "Manuelle Preisannahme")
+	}
 	if store.preferences != nil {
-		store.preferences.SetInt(factorYearPreferenceKey, year)
+		store.preferences.SetInt(calculationYearPreferenceKey, year)
 	}
 }
 
@@ -63,7 +75,7 @@ func (store *settingsStore) Reset() {
 	store.config = calculation.DefaultConfig()
 	if store.preferences != nil {
 		store.preferences.RemoveValue(co2PricePreferenceKey)
-		store.preferences.RemoveValue(factorYearPreferenceKey)
+		store.preferences.RemoveValue(calculationYearPreferenceKey)
 	}
 }
 
@@ -103,7 +115,7 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 	panel.priceEntry.SetText(formatSettingsValue(store.Config().CO2PricePerTonne))
 	panel.priceControl = newQuantityControl(panel.priceEntry, "€/t")
 	panel.status = canvasText(" ", 12, appPalette.textSecondary, true)
-	panel.factorHint = canvasText(factorHintText(store.Config().Year), 11, appPalette.textMuted, false)
+	panel.factorHint = canvasText(factorHintText(store.Config().CalculationYear), 11, appPalette.textMuted, false)
 
 	yearOptions := yearSelectOptions()
 	panel.yearSelect = widget.NewSelect(yearOptions, func(selected string) {
@@ -113,7 +125,7 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 			panel.factorHint.Refresh()
 		}
 	})
-	panel.yearSelect.SetSelected(strconv.Itoa(store.Config().Year))
+	panel.yearSelect.SetSelected(strconv.Itoa(store.Config().CalculationYear))
 	yearField := container.NewGridWrap(fyne.NewSize(ui.formColWidth, 42), panel.yearSelect)
 
 	iconBackground := canvas.NewCircle(appPalette.resultSurface)
@@ -130,8 +142,8 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 	)
 	header := container.NewHBox(iconFrame, horizontalGap(16), heading)
 	description := container.NewVBox(
-		canvasText("Lege den gemeinsamen CO₂-Preis für alle", 14, appPalette.textSecondary, false),
-		canvasText("Brennstoffarten fest.", 14, appPalette.textSecondary, false),
+		canvasText("Lege CO₂-Preis und Berechnungsjahr getrennt fest.", 14, appPalette.textSecondary, false),
+		canvasText("Manuelle Preise werden als Annahme dokumentiert.", 14, appPalette.textSecondary, false),
 	)
 
 	resetButton := widget.NewButton("Standard wiederherstellen", panel.restoreDefault)
@@ -160,7 +172,7 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 		verticalGap(10),
 		panel.priceControl.content,
 		verticalGap(16),
-		canvasText("F A K T O R J A H R", 12, appPalette.textSecondary, true),
+		canvasText("B E R E C H N U N G S J A H R", 12, appPalette.textSecondary, true),
 		verticalGap(10),
 		yearField,
 		verticalGap(10),
@@ -197,15 +209,18 @@ func (panel *settingsPanel) apply() {
 	}
 	year, err := strconv.Atoi(panel.yearSelect.Selected)
 	if err != nil {
-		setStatus(panel.status, "Bitte ein gültiges Faktorjahr wählen.", appPalette.error)
+		setStatus(panel.status, "Bitte ein gültiges Berechnungsjahr wählen.", appPalette.error)
 		return
 	}
 	defaults := calculation.DefaultConfig()
-	if panel.resetDefault && price == defaults.CO2PricePerTonne && year == defaults.Year {
+	if price == defaults.CO2PricePerTonne {
 		panel.store.Reset()
+		if year != defaults.CalculationYear {
+			panel.store.SetCalculationYear(year)
+		}
 	} else {
+		panel.store.SetCalculationYear(year)
 		panel.store.SetCO2Price(price)
-		panel.store.SetFactorYear(year)
 	}
 	panel.dismiss()
 	if panel.onSaved != nil {
@@ -216,7 +231,7 @@ func (panel *settingsPanel) apply() {
 func (panel *settingsPanel) restoreDefault() {
 	defaults := calculation.DefaultConfig()
 	panel.priceEntry.SetText(formatSettingsValue(defaults.CO2PricePerTonne))
-	panel.yearSelect.SetSelected(strconv.Itoa(defaults.Year))
+	panel.yearSelect.SetSelected(strconv.Itoa(defaults.CalculationYear))
 	panel.resetDefault = true
 	setStatus(panel.status, "Standardwert eingesetzt – mit Übernehmen speichern.", appPalette.success)
 }
@@ -243,7 +258,7 @@ func yearSelectOptions() []string {
 	return options
 }
 
-// factorHintText shows the emission factors that actually apply for the given year.
+// factorHintText distinguishes the calculation year from factor validity and source year.
 func factorHintText(year int) string {
 	asOf := time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
 	oil, oilErr := calculation.FactorFor(calculation.FuelOil, asOf)
@@ -251,5 +266,5 @@ func factorHintText(year int) string {
 	if oilErr != nil || briquettesErr != nil {
 		return "Für dieses Jahr sind keine Faktoren hinterlegt."
 	}
-	return "Heizöl: EF " + formatFloat(oil.EmissionFactor, 4) + " · Briketts: EF " + formatFloat(briquettes.EmissionFactor, 4) + " kg CO₂/MJ"
+	return "Gültig seit " + oil.ValidFrom.Format("01/2006") + " · Quellenstand " + strconv.Itoa(oil.SourceYear) + " · EF Heizöl " + formatFloat(oil.EmissionFactor, 4) + " / Briketts " + formatFloat(briquettes.EmissionFactor, 4)
 }

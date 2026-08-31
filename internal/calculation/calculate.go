@@ -21,23 +21,38 @@ func Calculate(fuel FuelType, quantity float64, cfg Config) (models.CalculationR
 	energyMJ := f.CalorificValue * massKg
 	emissions := energyMJ * f.EmissionFactor
 	energyContent := energyMJ / mjPerKWh
+	calculationYear := cfg.effectiveYear()
+	priceReference := cfg.resolvedPriceReference()
 
 	record := models.CalculationRecord{
-		Valid:         true,
-		FuelType:      string(fuel),
-		Quantity:      quantity,
-		Unit:          f.Unit,
-		Emissions:     models.KgCO2(emissions),
-		EmissionCost:  (emissions / kgPerTonne) * cfg.CO2PricePerTonne * vatMultiplier,
-		EnergyContent: models.KWh(energyContent),
-		CO2PerKWh:     emissions / energyContent,
-		CO2Price:      cfg.CO2PricePerTonne,
-		FactorYear:    cfg.Year,
+		Valid:           true,
+		FuelType:        string(fuel),
+		Quantity:        quantity,
+		Unit:            f.Unit,
+		Emissions:       models.KgCO2(emissions),
+		EmissionCost:    (emissions / kgPerTonne) * cfg.CO2PricePerTonne * vatMultiplier,
+		EnergyContent:   models.KWh(energyContent),
+		CO2PerKWh:       emissions / energyContent,
+		CO2Price:        cfg.CO2PricePerTonne,
+		CalculationYear: calculationYear,
+		FactorYear:      calculationYear,
+		Price: models.PriceSnapshot{
+			EURPerTonne:   priceReference.Amount,
+			ReferenceYear: priceReference.ReferenceYear,
+			Source:        priceReference.Source,
+			SourceURL:     priceReference.SourceURL,
+			ValidFrom:     priceReference.ValidFrom,
+			ValidUntil:    priceReference.ValidUntil,
+			RangeMin:      priceReference.Min,
+			RangeMax:      priceReference.Max,
+			IsAssumption:  priceReference.IsAssumption,
+		},
 		Factor: models.FactorSnapshot{
 			CalorificValue: f.CalorificValue,
 			Density:        f.Density,
 			EmissionFactor: f.EmissionFactor,
 			Source:         f.Source,
+			SourceYear:     f.SourceYear,
 			ValidFrom:      f.ValidFrom,
 		},
 		Source:     f.Source,

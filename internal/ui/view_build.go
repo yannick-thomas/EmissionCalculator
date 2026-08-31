@@ -17,7 +17,7 @@ func buildReferenceView(window fyne.Window, mode string) *referenceView {
 func buildReferenceViewWithConfig(window fyne.Window, mode string, configProvider func() calculation.Config) *referenceView {
 	view := &referenceView{mode: mode, window: window, configProvider: configProvider}
 	view.quantityEntry = newFocusEntry()
-	view.quantityEntry.SetPlaceHolder("z. B. 12.500 oder 12,5")
+	view.quantityEntry.SetPlaceHolder("z. B. 12500 oder 12,5")
 	view.status = newStatusText()
 
 	view.resultValue = canvasText("—", 72, appPalette.textPrimary, true)
@@ -26,7 +26,7 @@ func buildReferenceViewWithConfig(window fyne.Window, mode string, configProvide
 	view.costValue = detailValue("—")
 	view.energyValue = detailValue("—")
 	view.co2Value = detailValue("—")
-	view.resultBasis = canvasText("", 14, color.Transparent, false)
+	view.resultBasis = newCalculationBasis()
 
 	view.calculateButton = newActionButton("Jetzt berechnen", view.calculate)
 	view.printButton = newCircleIconButton(printIconResource(), view.print)
@@ -137,7 +137,7 @@ func buildForm(view *referenceView) fyne.CanvasObject {
 		verticalGap(12),
 		view.quantityControl.content,
 		verticalGap(8),
-		canvasText("Beispiel: 1.250 oder 1250,5", 14, appPalette.textSecondary, false),
+		canvasText("Beispiel: 1250 oder 1250,5", 14, appPalette.textSecondary, false),
 		verticalGap(8),
 		statusFrame,
 		verticalGap(16),
@@ -177,7 +177,7 @@ func buildResultCard(view *referenceView) fyne.CanvasObject {
 		verticalGap(18),
 		canvasText("Berechnungsgrundlage", 15, appPalette.textPrimary, true),
 		verticalGap(8),
-		view.resultBasis,
+		view.resultBasis.content,
 	)
 
 	view.resultBackground = canvas.NewImageFromResource(resultPanelResource(false))
