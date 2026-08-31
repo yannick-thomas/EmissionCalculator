@@ -261,10 +261,13 @@ func yearSelectOptions() []string {
 // factorHintText distinguishes the calculation year from factor validity and source year.
 func factorHintText(year int) string {
 	asOf := time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
-	oil, oilErr := calculation.FactorFor(calculation.FuelOil, asOf)
-	briquettes, briquettesErr := calculation.FactorFor(calculation.FuelBriquettes, asOf)
-	if oilErr != nil || briquettesErr != nil {
-		return "Für dieses Jahr sind keine Faktoren hinterlegt."
+	parts := make([]string, 0, len(calculation.Catalog))
+	for _, descriptor := range calculation.Catalog {
+		factor, err := calculation.FactorFor(descriptor.Fuel, asOf)
+		if err != nil {
+			return "Für dieses Jahr sind nicht alle Faktoren hinterlegt."
+		}
+		parts = append(parts, descriptor.Label+" "+formatFloat(factor.EmissionFactor, 4))
 	}
-	return "Gültig seit " + oil.ValidFrom.Format("01/2006") + " · Quellenstand " + strconv.Itoa(oil.SourceYear) + " · EF Heizöl " + formatFloat(oil.EmissionFactor, 4) + " / Briketts " + formatFloat(briquettes.EmissionFactor, 4)
+	return "Paket " + calculation.CurrentFactorPack().ID + " · EF kg CO₂/MJ: " + strings.Join(parts, " / ")
 }

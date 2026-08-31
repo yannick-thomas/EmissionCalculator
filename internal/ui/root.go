@@ -2,6 +2,7 @@ package ui
 
 import (
 	"emissioncalculator/internal/calculation"
+	"emissioncalculator/internal/history"
 	"emissioncalculator/internal/models"
 	"emissioncalculator/internal/pdf"
 	"os/exec"
@@ -18,7 +19,9 @@ var openExportedFile = openFile
 
 const (
 	modeOil        = "oil"
-	modeBriquettes = "briketts"
+	modeBriquettes = "briquettes"
+	modeNaturalGas = "natural_gas"
+	modeLPG        = "lpg"
 )
 
 type resultState int
@@ -41,6 +44,7 @@ type referenceView struct {
 	printButton           *circleIconButton
 	saveButton            *circleIconButton
 	scenarioButton        *circleIconButton
+	traceButton           *circleIconButton
 	status                *canvas.Text
 	headerStatus          *canvas.Text
 	headerStatusDot       *canvas.Circle
@@ -58,6 +62,7 @@ type referenceView struct {
 	co2Value              *canvas.Text
 	resultBasis           *calculationBasis
 	configProvider        func() calculation.Config
+	saveHistory           func(models.CalculationRecord) error
 	state                 resultState
 }
 
@@ -66,13 +71,33 @@ func NewRootWindow(app fyne.App) fyne.Window {
 	window := app.NewWindow("Emissionsrechner")
 	window.Resize(fyne.NewSize(1080, 980))
 	settings := newSettingsStore(app.Preferences())
-	oilView := buildReferenceViewWithConfig(window, modeOil, settings.Config)
-	briquettesView := buildReferenceViewWithConfig(window, modeBriquettes, settings.Config)
-	briquettesView.content.Hide()
-	navigation := buildSharedNavigation(window, settings, oilView, briquettesView)
-	views := container.NewStack(oilView.content, briquettesView.content)
-	window.SetContent(container.NewBorder(navigation, nil, nil, nil, views))
+	historyController := newHistoryController()
+	views := make([]*referenceView, 0, len(calculation.Catalog))
+	objects := make([]fyne.CanvasObject, 0, len(calculation.Catalog))
+	for index, descriptor := range calculation.Catalog {
+		view := buildReferenceViewWithConfig(window, string(descriptor.Fuel), settings.Config)
+		view.saveHistory = historyController.Save
+		if index > 0 {
+			view.content.Hide()
+		}
+		views = append(views, view)
+		objects = append(objects, view.content)
+	}
+	navigation := buildSharedNavigation(window, settings, historyController, views)
+	window.SetContent(container.NewBorder(navigation, nil, nil, nil, container.NewStack(objects...)))
 	return window
+}
+
+func newHistoryController() *historyController {
+	store, err := history.NewDefaultStore()
+	if err != nil {
+		return &historyController{initErr: err}
+	}
+	controller, err := newHistoryControllerWithStore(store)
+	if err != nil {
+		return &historyController{store: store, initErr: err}
+	}
+	return controller
 }
 
 func openFile(path string) error {

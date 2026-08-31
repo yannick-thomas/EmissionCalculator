@@ -8,7 +8,7 @@ import (
 )
 
 func TestImportCSVAndProcessReportsPerRowErrors(t *testing.T) {
-	csvData := "fuel,quantity\noil,10\nbriquettes,2.5\nerdgas,5\noil,-3\n"
+	csvData := "fuel,quantity,unit\noil,10,L\nbriquettes,2.5,t\nerdgas,5,L\noil,-3,L\n"
 	inputs, err := ImportCSV(strings.NewReader(csvData))
 	if err != nil {
 		t.Fatalf("unexpected import error: %v", err)

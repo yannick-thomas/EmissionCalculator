@@ -11,6 +11,7 @@ import (
 // app version produced this number") and is not a legal or regulatory certification.
 func ComputeAuditHash(r CalculationRecord) string {
 	canonical, _ := json.Marshal(struct {
+		SchemaVersion   int
 		FuelType        string
 		Quantity        float64
 		Unit            string
@@ -21,13 +22,15 @@ func ComputeAuditHash(r CalculationRecord) string {
 		CalculationYear int
 		Price           PriceSnapshot
 		Factor          FactorSnapshot
+		Trace           CalculationTrace
 		AppVersion      string
 		ComputedAt      string
 	}{
-		FuelType: r.FuelType, Quantity: r.Quantity, Unit: r.Unit,
+		SchemaVersion: r.SchemaVersion,
+		FuelType:      r.FuelType, Quantity: r.Quantity, Unit: r.Unit,
 		Emissions: r.Emissions, EmissionCost: r.EmissionCost,
 		EnergyContent: r.EnergyContent, CO2PerKWh: r.CO2PerKWh,
-		CalculationYear: r.CalculationYear, Price: r.Price, Factor: r.Factor,
+		CalculationYear: r.CalculationYear, Price: r.Price, Factor: r.Factor, Trace: r.Trace,
 		AppVersion: r.AppVersion,
 		ComputedAt: r.ComputedAt.UTC().Format("2006-01-02T15:04:05.000000000Z07:00"),
 	})

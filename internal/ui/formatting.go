@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"emissioncalculator/internal/calculation"
 	"fmt"
 	"math"
 	"strconv"
@@ -80,15 +81,26 @@ func formatMeasurement(value string, decimals int) string {
 }
 
 func titleForMode(mode string) string {
-	if mode == modeOil {
-		return "Heizöl"
+	if descriptor, ok := calculation.FuelByType(calculation.FuelType(mode)); ok {
+		return descriptor.Label
 	}
-	return "Briketts"
+	return mode
 }
 
 func unitForMode(mode string) string {
-	if mode == modeOil {
-		return "Liter"
+	if descriptor, ok := calculation.FuelByType(calculation.FuelType(mode)); ok {
+		switch descriptor.Unit {
+		case "L":
+			return "Liter"
+		case "t":
+			return "Tonnen"
+		case "kg":
+			return "Kilogramm"
+		case "kWh":
+			return "kWh"
+		default:
+			return string(descriptor.Unit)
+		}
 	}
-	return "Tonnen"
+	return ""
 }

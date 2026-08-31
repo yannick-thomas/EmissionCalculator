@@ -1,6 +1,7 @@
 package calculation
 
 import (
+	"emissioncalculator/internal/models"
 	"emissioncalculator/internal/validation"
 	"math"
 	"testing"
@@ -33,6 +34,40 @@ func TestCalculateOil(t *testing.T) {
 	}
 	if math.Abs(result.CO2PerKWh-0.2664) > 0.0001 {
 		t.Fatalf("unexpected CO2 per kWh: %v", result.CO2PerKWh)
+	}
+}
+
+func TestCalculateAdditionalFuelsAndTypedUnits(t *testing.T) {
+	gas, err := CalculateQuantity(FuelNaturalGas, models.Quantity{Value: 1000, Unit: models.UnitKWh}, DefaultConfig())
+	if err != nil {
+		t.Fatalf("natural gas calculation failed: %v", err)
+	}
+	if math.Abs(float64(gas.Emissions)-200.88) > 0.001 || gas.Unit != "kWh" {
+		t.Fatalf("unexpected natural gas result: %+v", gas)
+	}
+
+	lpg, err := CalculateQuantity(FuelLPG, models.Quantity{Value: 100, Unit: models.UnitKilogram}, DefaultConfig())
+	if err != nil {
+		t.Fatalf("LPG calculation failed: %v", err)
+	}
+	if math.Abs(float64(lpg.Emissions)-302.328) > 0.001 || lpg.Unit != "kg" {
+		t.Fatalf("unexpected LPG result: %+v", lpg)
+	}
+	if _, err := CalculateQuantity(FuelNaturalGas, models.Quantity{Value: 10, Unit: models.UnitLitre}, DefaultConfig()); err == nil {
+		t.Fatal("expected unsupported unit to fail")
+	}
+}
+
+func TestCalculationIncludesReproducibleTrace(t *testing.T) {
+	record, err := Calculate(FuelOil, 100, DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.SchemaVersion != models.CalculationRecordSchemaVersion || record.Trace.FactorPackID == "" {
+		t.Fatalf("missing schema or factor pack metadata: %+v", record.Trace)
+	}
+	if len(record.Trace.Steps) < 4 {
+		t.Fatalf("expected calculation steps, got %+v", record.Trace.Steps)
 	}
 }
 
@@ -101,6 +136,8 @@ func TestParseFuelTypeAcceptsKnownIdentifiersAndLabels(t *testing.T) {
 		{"heizoel", FuelOil},
 		{"briquettes", FuelBriquettes},
 		{"Briketts", FuelBriquettes},
+		{"Erdgas", FuelNaturalGas},
+		{"Flüssiggas", FuelLPG},
 	}
 	for _, tc := range cases {
 		fuel, err := ParseFuelType(tc.input)
@@ -111,7 +148,7 @@ func TestParseFuelTypeAcceptsKnownIdentifiersAndLabels(t *testing.T) {
 			t.Fatalf("ParseFuelType(%q) = %v, expected %v", tc.input, fuel, tc.expected)
 		}
 	}
-	if _, err := ParseFuelType("erdgas"); err == nil {
+	if _, err := ParseFuelType("wasserstoff"); err == nil {
 		t.Fatal("expected an error for an unregistered fuel")
 	}
 }

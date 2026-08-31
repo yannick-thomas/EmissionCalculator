@@ -23,7 +23,7 @@ func ImportCSV(r io.Reader) ([]Input, error) {
 	if len(rows) == 0 {
 		return nil, nil
 	}
-	fuelIdx, quantityIdx, err := csvColumnIndexes(rows[0])
+	fuelIdx, quantityIdx, unitIdx, err := csvColumnIndexes(rows[0])
 	if err != nil {
 		return nil, err
 	}
@@ -36,37 +36,43 @@ func ImportCSV(r io.Reader) ([]Input, error) {
 		if quantityIdx < len(row) {
 			input.Quantity = strings.TrimSpace(row[quantityIdx])
 		}
+		if unitIdx >= 0 && unitIdx < len(row) {
+			input.Unit = strings.TrimSpace(row[unitIdx])
+		}
 		inputs = append(inputs, input)
 	}
 	return inputs, nil
 }
 
-func csvColumnIndexes(header []string) (fuelIdx, quantityIdx int, err error) {
-	fuelIdx, quantityIdx = -1, -1
+func csvColumnIndexes(header []string) (fuelIdx, quantityIdx, unitIdx int, err error) {
+	fuelIdx, quantityIdx, unitIdx = -1, -1, -1
 	for i, col := range header {
 		switch strings.ToLower(strings.TrimSpace(col)) {
 		case "fuel", "brennstoff":
 			fuelIdx = i
 		case "quantity", "menge":
 			quantityIdx = i
+		case "unit", "einheit":
+			unitIdx = i
 		}
 	}
 	if fuelIdx == -1 || quantityIdx == -1 {
-		return -1, -1, fmt.Errorf("csv-header muss die Spalten 'fuel' (oder 'brennstoff') und 'quantity' (oder 'menge') enthalten")
+		return -1, -1, -1, fmt.Errorf("csv-header muss die Spalten 'fuel' (oder 'brennstoff') und 'quantity' (oder 'menge') enthalten")
 	}
-	return fuelIdx, quantityIdx, nil
+	return fuelIdx, quantityIdx, unitIdx, nil
 }
 
 // ExportCSV writes one row per calculation record, including the audit hash for traceability.
 func ExportCSV(w io.Writer, records []models.CalculationRecord) error {
 	writer := csv.NewWriter(w)
 	defer writer.Flush()
-	header := []string{"fuel", "quantity", "unit", "emissions_kg", "cost_eur", "energy_kwh", "co2_per_kwh", "calculation_year", "price_reference_year", "factor_valid_from", "factor_source_year", "audit_hash"}
+	header := []string{"schema_version", "fuel", "quantity", "unit", "emissions_kg", "cost_eur", "energy_kwh", "co2_per_kwh", "calculation_year", "price_reference_year", "factor_pack_id", "factor_valid_from", "factor_source_year", "factor_source_url", "price_source_url", "audit_hash"}
 	if err := writer.Write(header); err != nil {
 		return fmt.Errorf("csv schreiben: %w", err)
 	}
 	for _, r := range records {
 		row := []string{
+			strconv.Itoa(r.SchemaVersion),
 			r.FuelType,
 			strconv.FormatFloat(r.Quantity, 'f', 2, 64),
 			r.Unit,
@@ -76,8 +82,11 @@ func ExportCSV(w io.Writer, records []models.CalculationRecord) error {
 			strconv.FormatFloat(r.CO2PerKWh, 'f', 4, 64),
 			strconv.Itoa(r.CalculationYear),
 			strconv.Itoa(r.Price.ReferenceYear),
+			r.Trace.FactorPackID,
 			r.Factor.ValidFrom.Format("2006-01-02"),
 			strconv.Itoa(r.Factor.SourceYear),
+			r.Factor.SourceURL,
+			r.Price.SourceURL,
 			r.AuditHash,
 		}
 		if err := writer.Write(row); err != nil {

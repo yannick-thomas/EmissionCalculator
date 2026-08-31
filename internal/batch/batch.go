@@ -14,6 +14,7 @@ type Input struct {
 	Row      int    `json:"-"`
 	Fuel     string `json:"fuel"`
 	Quantity string `json:"quantity"`
+	Unit     string `json:"unit,omitempty"`
 }
 
 // RowError reports a validation or calculation failure for a single input row.
@@ -47,7 +48,16 @@ func Process(inputs []Input, cfg calculation.Config) ([]models.CalculationRecord
 			errs = append(errs, RowError{Row: row, Message: err.Error()})
 			continue
 		}
-		record, err := calculation.Calculate(fuel, quantity, cfg)
+		descriptor, ok := calculation.FuelByType(fuel)
+		if !ok {
+			errs = append(errs, RowError{Row: row, Message: "Brennstoff ist nicht im Katalog enthalten"})
+			continue
+		}
+		unit := descriptor.Unit
+		if input.Unit != "" {
+			unit = models.Unit(input.Unit)
+		}
+		record, err := calculation.CalculateQuantity(fuel, models.Quantity{Value: quantity, Unit: unit}, cfg)
 		if err != nil {
 			errs = append(errs, RowError{Row: row, Message: err.Error()})
 			continue

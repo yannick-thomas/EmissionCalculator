@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "de-direct-combustion-2026.1",
+  "published_at": "2026-08-31T00:00:00Z",
+  "factors": [
+    {
+      "fuel": "oil",
+      "label": "Heizöl",
+      "dimension": "volume",
+      "default_unit": "L",
+      "conversions": [{"unit": "L", "energy_mj_per_unit": 36.166}],
+      "calorific_value_mj_per_kg": 42.8,
+      "density_kg_per_l": 0.845,
+      "emission_factor_kg_per_mj": 0.074,
+      "source": "UBA Climate Change 28/2022; DIN 51603-1",
+      "source_url": "https://www.umweltbundesamt.de/system/files/medien/11850/publikationen/28_2022_cc.pdf",
+      "source_year": 2022,
+      "valid_from": "2022-01-01T00:00:00Z"
+    },
+    {
+      "fuel": "briquettes",
+      "label": "Braunkohlebriketts",
+      "dimension": "mass",
+      "default_unit": "t",
+      "conversions": [{"unit": "t", "energy_mj_per_unit": 19000}],
+      "calorific_value_mj_per_kg": 19.0,
+      "emission_factor_kg_per_mj": 0.0992,
+      "source": "UBA Climate Change 28/2022",
+      "source_url": "https://www.umweltbundesamt.de/system/files/medien/11850/publikationen/28_2022_cc.pdf",
+      "source_year": 2022,
+      "valid_from": "2022-01-01T00:00:00Z"
+    },
+    {
+      "fuel": "natural_gas",
+      "label": "Erdgas",
+      "dimension": "energy",
+      "default_unit": "kWh",
+      "conversions": [{"unit": "kWh", "energy_mj_per_unit": 3.6}],
+      "emission_factor_kg_per_mj": 0.0558,
+      "source": "UBA Climate Change 28/2022",
+      "source_url": "https://www.umweltbundesamt.de/system/files/medien/11850/publikationen/28_2022_cc.pdf",
+      "source_year": 2022,
+      "valid_from": "2022-01-01T00:00:00Z"
+    },
+    {
+      "fuel": "lpg",
+      "label": "Flüssiggas",
+      "dimension": "mass",
+      "default_unit": "kg",
+      "conversions": [{"unit": "kg", "energy_mj_per_unit": 45.6}],
+      "calorific_value_mj_per_kg": 45.6,
+      "emission_factor_kg_per_mj": 0.0663,
+      "source": "UBA Climate Change 28/2022; Heizwert nach ZuV 2012",
+      "source_url": "https://www.umweltbundesamt.de/system/files/medien/11850/publikationen/28_2022_cc.pdf",
+      "source_year": 2022,
+      "valid_from": "2022-01-01T00:00:00Z"
+    }
+  ]
+}

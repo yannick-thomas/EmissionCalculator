@@ -7,7 +7,7 @@ import (
 	"io"
 )
 
-// ImportJSON decodes a JSON array of {"fuel": "...", "quantity": "..."} objects.
+// ImportJSON decodes a JSON array of {"fuel": "...", "quantity": "...", "unit": "..."} objects.
 func ImportJSON(r io.Reader) ([]Input, error) {
 	var inputs []Input
 	if err := json.NewDecoder(r).Decode(&inputs); err != nil {

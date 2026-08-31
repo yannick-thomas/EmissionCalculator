@@ -1,6 +1,7 @@
 package calculation
 
 import (
+	"emissioncalculator/internal/models"
 	"fmt"
 	"strings"
 	"time"
@@ -12,48 +13,20 @@ type FuelType string
 const (
 	FuelOil        FuelType = "oil"
 	FuelBriquettes FuelType = "briquettes"
+	FuelNaturalGas FuelType = "natural_gas"
+	FuelLPG        FuelType = "lpg"
 )
 
-// FuelFactor holds physical constants and regulatory metadata for a single fuel,
-// valid from ValidFrom until superseded by a later entry for the same fuel.
-type FuelFactor struct {
-	Fuel           FuelType
-	Unit           string  // native input unit label ("L" or "t")
-	CalorificValue float64 // lower heating value in MJ/kg
-	Density        float64 // kg/L (0 for mass-based fuels)
-	EmissionFactor float64 // kg CO₂/MJ
-	Source         string
-	SourceYear     int
-	ValidFrom      time.Time
-}
+// factorHistory is built from the validated, versioned factor pack. Publish a new pack
+// when official factors change; never rewrite a released pack.
+var factorHistory = factorHistoryFromPack(bundledFactorPack)
 
-// factorHistory holds every known factor version per fuel, in no particular order.
-// Append new entries when official emission factors are revised; never mutate existing ones,
-// so that past calculations stay reproducible from their recorded calculation year.
-var factorHistory = map[FuelType][]FuelFactor{
-	FuelOil: {
-		{
-			Fuel:           FuelOil,
-			Unit:           "L",
-			CalorificValue: 42.8,
-			Density:        0.845,
-			EmissionFactor: 0.074,
-			Source:         "UBA 2022, DIN 51603-1",
-			SourceYear:     2022,
-			ValidFrom:      time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
-		},
-	},
-	FuelBriquettes: {
-		{
-			Fuel:           FuelBriquettes,
-			Unit:           "t",
-			CalorificValue: 19.0,
-			EmissionFactor: 0.0992,
-			Source:         "UBA 2022",
-			SourceYear:     2022,
-			ValidFrom:      time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
-		},
-	},
+func factorHistoryFromPack(pack FactorPack) map[FuelType][]FuelFactor {
+	history := make(map[FuelType][]FuelFactor)
+	for _, factor := range pack.Factors {
+		history[factor.Fuel] = append(history[factor.Fuel], factor)
+	}
+	return history
 }
 
 // FactorFor returns the factor set for fuel that was valid at the given point in time:
@@ -99,17 +72,28 @@ func AvailableYears() []int {
 // FuelDescriptor describes a fuel selectable by users, the CLI, or batch import, independent of
 // its factor history.
 type FuelDescriptor struct {
-	Fuel  FuelType
-	Label string // German display label
-	Unit  string // native input unit label ("L" or "t")
+	Fuel      FuelType
+	Label     string
+	Unit      models.Unit
+	Dimension QuantityDimension
 }
 
-// Catalog lists every fuel currently supported end-to-end. To add a further Brennstoff (e.g. an
-// EBeV briquette subtype), register its verified FuelFactor in factorHistory and add an entry
-// here; never invent emission factor numbers without an official source.
-var Catalog = []FuelDescriptor{
-	{Fuel: FuelOil, Label: "Heizöl", Unit: "L"},
-	{Fuel: FuelBriquettes, Label: "Briketts", Unit: "t"},
+// Catalog lists every fuel currently supported end-to-end and is derived from the factor pack.
+var Catalog = catalogFromPack(bundledFactorPack)
+
+func catalogFromPack(pack FactorPack) []FuelDescriptor {
+	seen := make(map[FuelType]bool)
+	var catalog []FuelDescriptor
+	for _, factor := range pack.Factors {
+		if seen[factor.Fuel] {
+			continue
+		}
+		seen[factor.Fuel] = true
+		catalog = append(catalog, FuelDescriptor{
+			Fuel: factor.Fuel, Label: factor.Label, Unit: factor.DefaultUnit, Dimension: factor.Dimension,
+		})
+	}
+	return catalog
 }
 
 // FuelByType looks up a catalog descriptor by FuelType.
@@ -126,11 +110,20 @@ func FuelByType(fuel FuelType) (FuelDescriptor, bool) {
 // common German labels (as used in CSV/JSON batch import).
 func ParseFuelType(value string) (FuelType, error) {
 	normalized := strings.ToLower(strings.TrimSpace(value))
+	for _, descriptor := range Catalog {
+		if normalized == string(descriptor.Fuel) || normalized == strings.ToLower(descriptor.Label) {
+			return descriptor.Fuel, nil
+		}
+	}
 	switch normalized {
-	case string(FuelOil), "heizöl", "heizoel":
+	case "heizoel":
 		return FuelOil, nil
-	case string(FuelBriquettes), "briketts":
+	case "briketts", "braunkohlenbrikett":
 		return FuelBriquettes, nil
+	case "erdgas", "gas":
+		return FuelNaturalGas, nil
+	case "flüssiggas", "fluessiggas", "propangas", "propan":
+		return FuelLPG, nil
 	default:
 		return "", fmt.Errorf("unbekannter Brennstoff: %q", value)
 	}

@@ -35,6 +35,8 @@ func buildReferenceViewWithConfig(window fyne.Window, mode string, configProvide
 	view.saveButton.Disable()
 	view.scenarioButton = newCircleIconButton(scenarioIconResource(), view.showScenarios)
 	view.scenarioButton.Disable()
+	view.traceButton = newCircleIconButton(traceIconResource(), view.showTrace)
+	view.traceButton.Disable()
 
 	view.content = buildAppShell(view)
 	view.quantityEntry.OnSubmitted = func(string) { view.calculate() }
@@ -90,7 +92,9 @@ func buildHeader(view *referenceView) fyne.CanvasObject {
 	actions := container.NewHBox(
 		statusGroup,
 		horizontalGap(8),
-		headerAction(view.scenarioButton, "Details"),
+		headerAction(view.traceButton, "Rechenweg"),
+		horizontalGap(8),
+		headerAction(view.scenarioButton, "Szenarien"),
 		horizontalGap(8),
 		headerAction(view.saveButton, "PDF speichern"),
 		horizontalGap(8),

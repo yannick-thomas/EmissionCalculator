@@ -61,6 +61,44 @@ func TestReferenceViewCalculatesBothModesAndPrints(t *testing.T) {
 	}
 }
 
+func TestReferenceViewCalculatesCatalogFuelsWithTheirTypedUnits(t *testing.T) {
+	app := test.NewApp()
+	defer app.Quit()
+	window := app.NewWindow("test")
+	tests := []struct {
+		mode string
+		unit string
+	}{
+		{modeOil, "L"},
+		{modeBriquettes, "t"},
+		{modeNaturalGas, "kWh"},
+		{modeLPG, "kg"},
+	}
+	for _, item := range tests {
+		view := buildReferenceView(window, item.mode)
+		view.quantityEntry.SetText("10")
+		test.Tap(view.calculateButton)
+		if !view.result.Valid || view.result.Unit != item.unit || view.result.Trace.FactorPackID == "" {
+			t.Fatalf("mode %s produced an incomplete record: %+v", item.mode, view.result)
+		}
+		if view.traceButton.Disabled() || view.scenarioButton.Disabled() {
+			t.Fatalf("mode %s should enable trace and scenarios", item.mode)
+		}
+	}
+}
+
+func TestParseScenarioPrices(t *testing.T) {
+	prices, err := parseScenarioPrices("55; 60,5; 65")
+	if err != nil || len(prices) != 3 || prices[1] != 60.5 {
+		t.Fatalf("unexpected prices: %v, %v", prices, err)
+	}
+	for _, invalid := range []string{"60", "55; NaN", "55; 60; 65; 70; 75; 80; 85; 90; 95"} {
+		if _, err := parseScenarioPrices(invalid); err == nil {
+			t.Fatalf("expected %q to be rejected", invalid)
+		}
+	}
+}
+
 func TestReferenceViewShowsAndClearsValidationState(t *testing.T) {
 	app := test.NewApp()
 	defer app.Quit()

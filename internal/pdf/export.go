@@ -65,13 +65,18 @@ func RenderLabel(r models.CalculationRecord) ([]byte, error) {
 		"Menge: " + formatNumber(r.Quantity, 2) + " " + r.Unit,
 		"Energiegehalt: " + formatNumber(float64(r.EnergyContent), 2) + " kWh",
 		"Emissionsintensität: " + formatNumber(r.CO2PerKWh, 4) + " kg CO₂/kWh",
-		"Heizwert Hu: " + formatNumber(r.Factor.CalorificValue, 1) + " MJ/kg",
 		"Emissionsfaktor: " + formatNumber(r.Factor.EmissionFactor, 4) + " kg CO₂/MJ",
+	}
+	if r.Factor.CalorificValue > 0 {
+		left = append(left, "Heizwert Hu: "+formatNumber(r.Factor.CalorificValue, 1)+" MJ/kg")
+	} else {
+		left = append(left, "Energie je Einheit: "+formatNumber(r.Factor.EnergyMJPerUnit, 2)+" MJ/"+string(r.Factor.InputUnit))
 	}
 	if r.Factor.Density > 0 {
 		left = append(left, "Dichte: "+formatNumber(r.Factor.Density, 3)+" kg/L")
 	}
 	left = append(left,
+		"Faktorenpaket: "+r.Trace.FactorPackID,
 		fmt.Sprintf("Faktor gültig seit: %s", formatDate(r.Factor.ValidFrom)),
 		fmt.Sprintf("Quellenstand Faktor: %d", r.Factor.SourceYear),
 	)
@@ -85,7 +90,7 @@ func RenderLabel(r models.CalculationRecord) ([]byte, error) {
 		fmt.Sprintf("Preisstand: %d · %s", r.Price.ReferenceYear, priceKind),
 	}
 	if r.Price.RangeMin > 0 && r.Price.RangeMax > 0 {
-		right = append(right, "Offizieller Korridor: "+formatNumber(r.Price.RangeMin, 0)+"–"+formatNumber(r.Price.RangeMax, 0)+" €/t")
+		right = append(right, "Offizieller Korridor: "+formatNumber(r.Price.RangeMin, 0)+" - "+formatNumber(r.Price.RangeMax, 0)+" €/t")
 	}
 	right = append(right,
 		"Preisquelle: "+r.Price.Source,
@@ -107,7 +112,7 @@ func RenderLabel(r models.CalculationRecord) ([]byte, error) {
 	if len(auditID) > 16 {
 		auditID = auditID[:16]
 	}
-	doc.CellFormat(0, 4, "Audit-ID: "+auditID+" · Interne Nachvollziehbarkeit, keine amtliche Zertifizierung.", "", 1, "L", false, 0, "")
+	doc.CellFormat(0, 4, fmt.Sprintf("Schema %d · Audit-ID: %s · Interne Nachvollziehbarkeit, keine amtliche Zertifizierung.", r.SchemaVersion, auditID), "", 1, "L", false, 0, "")
 
 	var buf bytes.Buffer
 	if err := doc.Output(&buf); err != nil {

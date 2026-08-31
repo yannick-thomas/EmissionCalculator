@@ -24,10 +24,19 @@ func (view *referenceView) calculate() {
 	if view.configProvider != nil {
 		cfg = view.configProvider()
 	}
-	if view.mode == modeOil {
-		view.result = calculation.CalculateOil(input, cfg)
-	} else {
-		view.result = calculation.CalculateBriquettes(input, cfg)
+	fuel, err := calculation.ParseFuelType(view.mode)
+	if err != nil {
+		view.clearResult()
+		setStatus(view.status, err.Error(), appPalette.error)
+		view.setHeaderStatus("Fehler", appPalette.error)
+		return
+	}
+	view.result, err = calculation.Calculate(fuel, input, cfg)
+	if err != nil {
+		view.clearResult()
+		setStatus(view.status, err.Error(), appPalette.error)
+		view.setHeaderStatus("Fehler", appPalette.error)
+		return
 	}
 	emissionsFormatted := formatFloat(float64(view.result.Emissions), 2)
 	view.resultValue.Text = emissionsFormatted
@@ -44,6 +53,7 @@ func (view *referenceView) calculate() {
 	view.printButton.Enable()
 	view.saveButton.Enable()
 	view.scenarioButton.Enable()
+	view.traceButton.Enable()
 	view.state = resultStateCalculated
 	view.resultBadge.Text = "Berechnet"
 	view.resultBadge.Color = appPalette.textSecondary
@@ -55,6 +65,11 @@ func (view *referenceView) calculate() {
 	canvas.Refresh(view.resultBadgeBackground)
 	setStatus(view.status, " ", appPalette.textSecondary)
 	view.setHeaderStatus("Berechnet", appPalette.success)
+	if view.saveHistory != nil {
+		if err := view.saveHistory(view.result); err != nil {
+			setStatus(view.status, "Berechnet, aber nicht in der Historie gespeichert: "+err.Error(), appPalette.error)
+		}
+	}
 }
 
 func (view *referenceView) refreshForSettingsChange() {
@@ -68,6 +83,7 @@ func (view *referenceView) markResultStale(state resultState, message string, st
 	view.printButton.Disable()
 	view.saveButton.Disable()
 	view.scenarioButton.Disable()
+	view.traceButton.Disable()
 	if view.result.Valid {
 		view.resultHint.Text = "Eingabe geändert – neu berechnen"
 		view.resultBadge.Text = "Ergebnis veraltet"
@@ -96,6 +112,7 @@ func (view *referenceView) clearResult() {
 	view.printButton.Disable()
 	view.saveButton.Disable()
 	view.scenarioButton.Disable()
+	view.traceButton.Disable()
 	view.resultBadge.Color = color.Transparent
 	view.resultBadgeBackground.StrokeColor = color.Transparent
 	view.resultBasis.Clear()
@@ -169,4 +186,12 @@ func (view *referenceView) showScenarios() {
 		return
 	}
 	showScenarioDialog(view)
+}
+
+func (view *referenceView) showTrace() {
+	if !view.hasCurrentResult() {
+		setStatus(view.status, "Bitte zuerst eine gültige Berechnung durchführen.", appPalette.error)
+		return
+	}
+	showTraceDialog(view)
 }
