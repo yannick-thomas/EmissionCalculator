@@ -78,17 +78,18 @@ func showScenarioDialog(view *referenceView) {
 	}
 	yearSelect.OnChanged = func(string) { render() }
 	updateButton := widget.NewButton("Vergleich aktualisieren", render)
-	form := container.NewGridWithColumns(2,
+	form := container.NewVBox(
 		container.NewVBox(widget.NewLabel("Berechnungsjahr"), yearSelect),
 		container.NewVBox(widget.NewLabel("CO₂-Preise in €/t (mit Semikolon trennen)"), pricesEntry),
 	)
 	render()
+	rowsScroll := container.NewVScroll(rows)
+	rowsScroll.SetMinSize(fyne.NewSize(760, 300))
 	content := container.NewVBox(
 		canvasText("Vergleich für "+formatQuantityDisplay(view.result.Quantity)+" "+unitForMode(view.mode)+" "+titleForMode(view.mode), 13, appPalette.textSecondary, false),
-		verticalGap(10), form, updateButton, message, verticalGap(8), container.NewVScroll(rows),
+		verticalGap(10), form, updateButton, message, verticalGap(8), rowsScroll,
 	)
-	content.Resize(fyne.NewSize(820, 500))
-	dialog.ShowCustom("Szenariovergleich", "Schließen", content, view.window)
+	showResponsiveDialog("Szenariovergleich", "Schließen", content, view.window, fyne.NewSize(920, 650))
 }
 
 func defaultScenarioPrices(record models.CalculationRecord) string {

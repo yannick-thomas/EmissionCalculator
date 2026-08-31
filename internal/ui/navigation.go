@@ -37,29 +37,28 @@ func buildSharedNavigation(window fyne.Window, settings *settingsStore, history 
 	})
 	navigationDivider := canvas.NewRectangle(appPalette.border)
 	navigationDivider.SetMinSize(fyne.NewSize(1, 34))
-	navigationObjects := make([]fyne.CanvasObject, 0, len(buttons)*2+5)
+	fuelObjects := make([]fyne.CanvasObject, 0, len(buttons)*2)
 	for index, button := range buttons {
 		if index > 0 {
-			navigationObjects = append(navigationObjects, horizontalGap(6))
+			fuelObjects = append(fuelObjects, horizontalGap(6))
 		}
-		navigationObjects = append(navigationObjects, container.NewGridWrap(fyne.NewSize(136, 62), button))
+		fuelObjects = append(fuelObjects, container.NewGridWrap(fyne.NewSize(136, 62), button))
 	}
+	fuelsScroll := container.NewHScroll(container.NewHBox(fuelObjects...))
 	historyButton := newCircleIconButton(historyIconResource(), func() { showHistoryDialog(window, history) })
-	navigationObjects = append(navigationObjects, horizontalGap(10), container.NewGridWrap(fyne.NewSize(54, 54), historyButton))
-	navigationObjects = append(navigationObjects,
-		horizontalGap(14),
+	toolActions := container.NewHBox(
+		container.NewGridWrap(fyne.NewSize(54, 54), historyButton),
+		horizontalGap(12),
 		container.NewCenter(navigationDivider),
-		horizontalGap(14),
+		horizontalGap(12),
 		container.NewGridWrap(fyne.NewSize(54, 54), settingsButton),
 	)
-	navigationActions := container.NewHBox(navigationObjects...)
-	barContent := container.NewBorder(nil, nil, logo, navigationActions, nil)
-	barFrame := container.NewGridWrap(fyne.NewSize(ui.contentWidth, ui.topBarHeight), barContent)
+	barContent := container.New(&responsiveNavigationLayout{}, logo, fuelsScroll, toolActions)
 	background := canvas.NewRectangle(appPalette.railBackground)
 	background.SetMinSize(fyne.NewSize(0, ui.topBarHeight))
 	separator := canvas.NewRectangle(appPalette.border)
 	separator.SetMinSize(fyne.NewSize(0, 1))
-	return container.NewBorder(nil, separator, nil, nil, container.NewStack(background, container.NewCenter(barFrame)))
+	return container.NewBorder(nil, separator, nil, nil, container.NewStack(background, container.NewPadded(barContent)))
 }
 
 func navigationLabel(descriptor calculation.FuelDescriptor) string {

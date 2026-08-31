@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -28,15 +27,16 @@ func showTraceDialog(view *referenceView) {
 	)
 	addSourceLink(metadata, "Quelle Emissionsfaktor", record.Factor.SourceURL)
 	addSourceLink(metadata, "Quelle CO₂-Preis", record.Price.SourceURL)
+	stepsScroll := container.NewVScroll(steps)
+	stepsScroll.SetMinSize(fyne.NewSize(620, 340))
 	content := container.NewVBox(
 		canvasText("Jeder Wert wird aus dem gespeicherten Faktor-Snapshot neu aufgebaut.", 13, appPalette.textSecondary, false),
 		verticalGap(12),
-		container.NewVScroll(steps),
+		stepsScroll,
 		verticalGap(12),
 		metadata,
 	)
-	content.Resize(fyne.NewSize(700, 560))
-	dialog.ShowCustom("So wurde gerechnet", "Schließen", content, view.window)
+	showResponsiveDialog("So wurde gerechnet", "Schließen", content, view.window, fyne.NewSize(760, 680))
 }
 
 func addSourceLink(target *fyne.Container, label, rawURL string) {

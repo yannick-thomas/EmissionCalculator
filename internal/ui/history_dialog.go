@@ -97,14 +97,15 @@ func showHistoryDialog(window fyne.Window, controller *historyController) {
 		projectSelect.Refresh()
 	})
 	refreshEntries()
+	entriesScroll := container.NewVScroll(entriesBox)
+	entriesScroll.SetMinSize(fyne.NewSize(700, 340))
 	content := container.NewVBox(
 		canvasText("Aktives Projekt", 13, appPalette.textPrimary, true),
 		projectSelect,
 		container.NewBorder(nil, nil, nil, newProjectButton, nameEntry),
 		verticalGap(12),
 		canvasText("Lokale Berechnungshistorie", 13, appPalette.textPrimary, true),
-		container.NewVScroll(entriesBox),
+		entriesScroll,
 	)
-	content.Resize(fyne.NewSize(760, 520))
-	dialog.ShowCustom("Projekte und Historie", "Schließen", content, window)
+	showResponsiveDialog("Projekte und Historie", "Schließen", content, window, fyne.NewSize(860, 680))
 }

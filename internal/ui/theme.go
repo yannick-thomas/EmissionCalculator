@@ -13,11 +13,9 @@ import (
 )
 
 type designTokens struct {
-	topBarHeight   float32
-	contentWidth   float32
-	formColWidth   float32
-	resultColWidth float32
-	colHeight      float32
+	topBarHeight float32
+	formColWidth float32
+	colHeight    float32
 }
 
 type palette struct {
@@ -41,11 +39,9 @@ type palette struct {
 }
 
 var ui = designTokens{
-	topBarHeight:   96,
-	contentWidth:   1000,
-	formColWidth:   460,
-	resultColWidth: 520,
-	colHeight:      570,
+	topBarHeight: 128,
+	formColWidth: 460,
+	colHeight:    570,
 }
 
 var appPalette = palette{

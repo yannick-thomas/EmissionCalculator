@@ -69,7 +69,8 @@ type referenceView struct {
 func NewRootWindow(app fyne.App) fyne.Window {
 	app.Settings().SetTheme(emissionTheme{Theme: theme.LightTheme()})
 	window := app.NewWindow("Emissionsrechner")
-	window.Resize(fyne.NewSize(1080, 980))
+	window.Resize(fyne.NewSize(1240, 900))
+	window.CenterOnScreen()
 	settings := newSettingsStore(app.Preferences())
 	historyController := newHistoryController()
 	views := make([]*referenceView, 0, len(calculation.Catalog))

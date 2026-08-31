@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -93,18 +94,17 @@ type settingsPanel struct {
 	priceEntry   *focusEntry
 	priceControl *quantityControl
 	yearSelect   *widget.Select
-	factorHint   *canvas.Text
+	factorHint   *widget.Label
 	status       *canvas.Text
 	content      fyne.CanvasObject
-	popup        *widget.PopUp
+	popup        dialog.Dialog
 	onSaved      func()
 	resetDefault bool
 }
 
 func showSettingsDialog(window fyne.Window, store *settingsStore, onSaved func()) *settingsPanel {
 	panel := newSettingsPanel(store, onSaved)
-	panel.popup = widget.NewModalPopUp(panel.content, window.Canvas())
-	panel.popup.Show()
+	panel.popup = showResponsiveDialogWithoutButtons("Einstellungen", panel.content, window, fyne.NewSize(640, 740))
 	window.Canvas().Focus(panel.priceEntry)
 	return panel
 }
@@ -115,18 +115,18 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 	panel.priceEntry.SetText(formatSettingsValue(store.Config().CO2PricePerTonne))
 	panel.priceControl = newQuantityControl(panel.priceEntry, "€/t")
 	panel.status = canvasText(" ", 12, appPalette.textSecondary, true)
-	panel.factorHint = canvasText(factorHintText(store.Config().CalculationYear), 11, appPalette.textMuted, false)
+	panel.factorHint = widget.NewLabel(factorHintText(store.Config().CalculationYear))
+	panel.factorHint.Wrapping = fyne.TextWrapWord
 
 	yearOptions := yearSelectOptions()
 	panel.yearSelect = widget.NewSelect(yearOptions, func(selected string) {
 		panel.resetDefault = false
 		if year, err := strconv.Atoi(selected); err == nil {
-			panel.factorHint.Text = factorHintText(year)
-			panel.factorHint.Refresh()
+			panel.factorHint.SetText(factorHintText(year))
 		}
 	})
 	panel.yearSelect.SetSelected(strconv.Itoa(store.Config().CalculationYear))
-	yearField := container.NewGridWrap(fyne.NewSize(ui.formColWidth, 42), panel.yearSelect)
+	yearField := container.NewBorder(nil, nil, nil, nil, panel.yearSelect)
 
 	iconBackground := canvas.NewCircle(appPalette.resultSurface)
 	icon := canvas.NewImageFromResource(settingsIconResource())
@@ -146,16 +146,11 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 		canvasText("Manuelle Preise werden als Annahme dokumentiert.", 14, appPalette.textSecondary, false),
 	)
 
-	resetButton := widget.NewButton("Standard wiederherstellen", panel.restoreDefault)
-	resetButton.Importance = widget.LowImportance
+	resetButton := widget.NewButton("Zurücksetzen", panel.restoreDefault)
 	cancelButton := widget.NewButton("Abbrechen", panel.dismiss)
 	applyButton := widget.NewButton("Übernehmen", panel.apply)
 	applyButton.Importance = widget.HighImportance
-	actions := container.NewVBox(
-		container.NewHBox(resetButton),
-		verticalGap(12),
-		container.NewBorder(nil, nil, cancelButton, applyButton, nil),
-	)
+	actions := container.NewGridWithColumns(3, resetButton, cancelButton, applyButton)
 
 	separatorTop := canvas.NewRectangle(appPalette.border)
 	separatorTop.SetMinSize(fyne.NewSize(1, 1))
@@ -178,7 +173,7 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 		verticalGap(10),
 		panel.factorHint,
 		verticalGap(8),
-		container.NewGridWrap(fyne.NewSize(ui.formColWidth, 20), panel.status),
+		panel.status,
 		verticalGap(12),
 		separatorBottom,
 		verticalGap(12),
@@ -190,7 +185,12 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 	background.StrokeColor = appPalette.border
 	background.StrokeWidth = 1
 	inset := container.NewBorder(verticalGap(28), verticalGap(24), horizontalGap(30), horizontalGap(30), form)
-	panel.content = container.NewGridWrap(fyne.NewSize(540, 590), container.NewStack(background, inset))
+	card := container.NewStack(background, inset)
+	cardScroll := container.NewScroll(card)
+	panel.content = container.New(
+		&centeredCardLayout{preferred: fyne.NewSize(560, 650), minimum: fyne.NewSize(360, 320), margin: 20},
+		cardScroll,
+	)
 	panel.priceEntry.OnSubmitted = func(string) { panel.apply() }
 	panel.priceEntry.OnChanged = func(string) {
 		panel.resetDefault = false

@@ -62,16 +62,8 @@ func buildReferenceViewWithConfig(window fyne.Window, mode string, configProvide
 
 func buildAppShell(view *referenceView) fyne.CanvasObject {
 	header := buildHeader(view)
-	form := container.NewGridWrap(fyne.NewSize(ui.formColWidth, ui.colHeight), buildForm(view))
-	result := container.NewGridWrap(fyne.NewSize(ui.resultColWidth, ui.colHeight), buildResultCard(view))
-	columns := container.NewHBox(form, horizontalGap(20), result)
-	page := container.NewVBox(
-		header,
-		verticalGap(36),
-		columns,
-		verticalGap(36),
-	)
-	scroll := container.NewVScroll(container.NewCenter(page))
+	page := newResponsivePage(header, buildForm(view), buildResultCard(view))
+	scroll := container.NewVScroll(page)
 	view.scroll = scroll
 	return container.NewStack(canvas.NewRectangle(appPalette.background), scroll)
 }
@@ -88,10 +80,8 @@ func buildHeader(view *referenceView) fyne.CanvasObject {
 	statusHalo := canvas.NewCircle(color.NRGBA{R: 0x83, G: 0xa8, B: 0x31, A: 30})
 	readyIndicator := container.NewGridWrap(fyne.NewSize(24, 24), container.NewStack(statusHalo, container.NewPadded(view.headerStatusDot)))
 	view.headerStatus = canvasText("Bereit", 16, appPalette.textSecondary, true)
-	statusGroup := container.NewGridWrap(fyne.NewSize(190, 54), container.NewCenter(container.NewHBox(readyIndicator, view.headerStatus)))
-	actions := container.NewHBox(
-		statusGroup,
-		horizontalGap(8),
+	statusGroup := container.NewCenter(container.NewHBox(readyIndicator, view.headerStatus))
+	actionsContent := container.NewHBox(
 		headerAction(view.traceButton, "Rechenweg"),
 		horizontalGap(8),
 		headerAction(view.scenarioButton, "Szenarien"),
@@ -100,12 +90,10 @@ func buildHeader(view *referenceView) fyne.CanvasObject {
 		horizontalGap(8),
 		headerAction(view.printButton, "Drucken"),
 	)
-	headerContent := container.NewBorder(nil, nil, container.NewCenter(brandGroup), container.NewCenter(actions), nil)
-	headerFrame := container.NewGridWrap(fyne.NewSize(ui.contentWidth, 112), headerContent)
-
+	actions := container.NewHScroll(actionsContent)
 	separator := canvas.NewRectangle(appPalette.border)
 	separator.SetMinSize(fyne.NewSize(1, 1))
-	return container.NewVBox(headerFrame, separator)
+	return container.New(&responsiveHeaderLayout{}, container.NewCenter(brandGroup), statusGroup, actions, separator)
 }
 
 func buildForm(view *referenceView) fyne.CanvasObject {
