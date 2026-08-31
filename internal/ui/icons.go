@@ -39,21 +39,27 @@ func printIconResource() fyne.Resource {
 	return fyne.NewStaticResource("print.svg", []byte(svg))
 }
 
+func saveIconResource() fyne.Resource {
+	svg := `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="#18213D" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.8h11.2L20 7.6V19a1.2 1.2 0 0 1-1.2 1.2H5A1.2 1.2 0 0 1 3.8 19V5A1.2 1.2 0 0 1 5 3.8Z"/><path d="M7.5 3.8v5h8v-5"/><path d="M7.5 14h9v6.2h-9z"/></g></svg>`
+	return fyne.NewStaticResource("save.svg", []byte(svg))
+}
+
+func scenarioIconResource() fyne.Resource {
+	svg := `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="#18213D" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18V9"/><path d="M10 18V5"/><path d="M16 18v-7"/><path d="M20 18V11"/><path d="M3 20h18"/></g></svg>`
+	return fyne.NewStaticResource("scenario.svg", []byte(svg))
+}
+
 func settingsIconResource() fyne.Resource {
-	svg := `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="#18213D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.1 13.8a1.7 1.7 0 0 0 .3 1.9l.1.1-2.4 2.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3.4v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.4-2.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4V9.4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L7.8 4l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h3.4v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.4 2.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v3.4h-.2a1.7 1.7 0 0 0-1.7 1Z"/></g></svg>`
+	svg := `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="#18213D" stroke-width="1.9" stroke-linecap="round"><line x1="3" y1="8" x2="6.2" y2="8"/><circle cx="9" cy="8" r="2.8"/><line x1="11.8" y1="8" x2="21" y2="8"/><line x1="3" y1="16" x2="12.2" y2="16"/><circle cx="15" cy="16" r="2.8"/><line x1="17.8" y1="16" x2="21" y2="16"/></g></svg>`
 	return fyne.NewStaticResource("settings.svg", []byte(svg))
 }
 
 func resultPanelResource(active bool) fyne.Resource {
 	fill := "#EDEEE7"
 	if active {
-		fill = "#E1F77B"
+		fill = "#D9EE8A"
 	}
-	coral := ""
-	if active {
-		coral = `<path d="M0 430A90 90 0 0 1 90 520H0Z" fill="#FF775F"/>`
-	}
-	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520"><defs><clipPath id="card"><rect width="990" height="510" rx="34"/></clipPath></defs><g clip-path="url(#card)"><rect width="990" height="510" rx="34" fill="%s"/><g fill="none" stroke="#62772E" stroke-opacity="0.13"><circle cx="930" cy="5" r="205" stroke-width="2"/><circle cx="930" cy="5" r="250" stroke-width="18" stroke-opacity="0.07"/></g>%s</g></svg>`, fill, coral)
+	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520"><rect width="990" height="510" rx="26" fill="%s"/></svg>`, fill)
 	return fyne.NewStaticResource(fmt.Sprintf("result-%t.svg", active), []byte(svg))
 }
 

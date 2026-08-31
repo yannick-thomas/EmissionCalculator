@@ -437,7 +437,7 @@ func newQuantityControl(entry *focusEntry, unitValue string) *quantityControl {
 	entry.TextStyle = fyne.TextStyle{Bold: true}
 	entry.Scroll = fyne.ScrollNone
 	control.unit = canvasText(unitValue, 18, appPalette.accent, true)
-	unitFrame := container.NewGridWrap(fyne.NewSize(110, 54), container.NewCenter(control.unit))
+	unitFrame := container.NewGridWrap(fyne.NewSize(76, 54), container.NewCenter(control.unit))
 	inputContent := container.NewBorder(nil, nil, nil, unitFrame, entry)
 	control.underline = canvas.NewRectangle(appPalette.textPrimary)
 	control.underline.SetMinSize(fyne.NewSize(1, 3))
@@ -461,7 +461,7 @@ func (control *quantityControl) SetError(invalid bool) {
 }
 
 func (control *quantityControl) refreshBorder() {
-	control.underline.FillColor = appPalette.textPrimary
+	control.underline.FillColor = appPalette.border
 	if control.focused {
 		control.underline.FillColor = appPalette.accent
 	}

@@ -1,7 +1,11 @@
 package ui
 
 import (
+	"math"
+	"strings"
 	"testing"
+
+	"emissioncalculator/internal/models"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
@@ -20,14 +24,19 @@ func TestReferenceViewCalculatesBothModesAndPrints(t *testing.T) {
 	}()
 
 	printed := false
-	exportLabel = func(emissions, cost, energy, co2 string) (string, error) {
-		printed = emissions == "26,76 kg CO2" && cost != "" && energy != "" && co2 == "0,2664"
+	exportLabel = func(r models.CalculationRecord) (string, error) {
+		printed = r.Valid &&
+			math.Abs(float64(r.Emissions)-26.76) < 0.01 &&
+			math.Abs(r.CO2PerKWh-0.2664) < 0.001
 		return "/tmp/emissions.pdf", nil
 	}
 	openExportedFile = func(string) error { return nil }
 
 	oilView := buildReferenceView(window, modeOil)
 	oilView.quantityEntry.SetText("10.0")
+	if oilView.result.Valid {
+		t.Fatal("expected input changes not to calculate automatically")
+	}
 	test.Tap(oilView.calculateButton)
 	if oilView.resultValue.Text != "26,76" || oilView.resultUnit.Text != "kg CO₂" {
 		t.Fatalf("unexpected oil result: %s", oilView.resultValue.Text)
@@ -67,8 +76,13 @@ func TestReferenceViewShowsAndClearsValidationState(t *testing.T) {
 	}
 
 	view.quantityEntry.SetText("12,5")
-	if view.quantityControl.invalid || view.headerStatus.Text != "Berechnet" {
-		t.Fatal("expected live calculation to clear the validation state and show a result")
+	if view.quantityControl.invalid || view.headerStatus.Text != "Bereit" || view.result.Valid {
+		t.Fatal("expected valid input to wait for an explicit calculation")
+	}
+	test.Tap(view.calculateButton)
+	view.quantityEntry.SetText("13")
+	if view.headerStatus.Text != "Eingabe geändert – neu berechnen" || !view.printButton.Disabled() || !view.saveButton.Disabled() {
+		t.Fatal("expected changed input to mark the visible result as stale and disable export")
 	}
 }
 
@@ -136,5 +150,44 @@ func TestReferenceViewFitsTargetWindow(t *testing.T) {
 	captured := window.Canvas().Capture()
 	if captured.Bounds().Dx() != 1080 || captured.Bounds().Dy() != 650 {
 		t.Fatalf("unexpected rendered size: %v", captured.Bounds())
+	}
+}
+
+func TestReferenceViewRendersAtTargetWindowSizes(t *testing.T) {
+	app := test.NewApp()
+	defer app.Quit()
+	window := app.NewWindow("test")
+	view := buildReferenceView(window, modeOil)
+	window.SetContent(view.content)
+
+	for _, size := range []fyne.Size{
+		fyne.NewSize(1080, 650),
+		fyne.NewSize(1080, 980),
+		fyne.NewSize(1440, 980),
+	} {
+		window.Resize(size)
+		captured := window.Canvas().Capture()
+		if captured.Bounds().Dx() != int(size.Width) || captured.Bounds().Dy() != int(size.Height) {
+			t.Fatalf("unexpected rendered size for %v: %v", size, captured.Bounds())
+		}
+	}
+}
+
+func TestResultUsesCompleteUnitsAndCalculationBasis(t *testing.T) {
+	app := test.NewApp()
+	defer app.Quit()
+	view := buildReferenceView(app.NewWindow("test"), modeOil)
+	view.quantityEntry.SetText("10")
+	test.Tap(view.calculateButton)
+	if !strings.Contains(view.co2Value.Text, "kg CO₂/kWh") {
+		t.Fatalf("expected complete intensity unit, got %q", view.co2Value.Text)
+	}
+	if !strings.Contains(view.costValue.Text, "€ brutto") {
+		t.Fatalf("expected gross cost unit, got %q", view.costValue.Text)
+	}
+	for _, expected := range []string{"Emissionsfaktor:", "CO₂-Preis:", "Umsatzsteuer:", "Faktorjahr:"} {
+		if !strings.Contains(view.resultBasis.Text, expected) {
+			t.Fatalf("missing calculation basis %q in %q", expected, view.resultBasis.Text)
+		}
 	}
 }

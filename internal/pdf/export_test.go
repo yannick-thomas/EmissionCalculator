@@ -1,12 +1,25 @@
 package pdf
 
 import (
+	"emissioncalculator/internal/models"
 	"os"
 	"testing"
 )
 
 func TestExportLabelCreatesPDF(t *testing.T) {
-	path, err := ExportLabel("26,76 kg CO2", "1,43 €", "9.995,30 kWh", "0,2664")
+	record := models.CalculationRecord{
+		Valid:         true,
+		FuelType:      "oil",
+		Quantity:      10,
+		Unit:          "L",
+		Emissions:     models.KgCO2(26.76),
+		EmissionCost:  1.43,
+		EnergyContent: models.KWh(100.45),
+		CO2PerKWh:     0.2664,
+		CO2Price:      45.0,
+		Source:        "UBA 2022, DIN 51603-1",
+	}
+	path, err := ExportLabel(record)
 	if err != nil {
 		t.Fatalf("export failed: %v", err)
 	}

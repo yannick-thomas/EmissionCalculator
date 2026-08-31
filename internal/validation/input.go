@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+// MaxQuantity is the largest accepted delivery quantity (applies to both litres and tonnes).
+const MaxQuantity = 1_000_000.0
+
 func ParseQuantity(input string) (float64, error) {
 	trimmed := strings.TrimSpace(input)
 	if trimmed == "" {
@@ -36,6 +39,9 @@ func ParseQuantity(input string) (float64, error) {
 	}
 	if value <= 0 {
 		return 0, fmt.Errorf("Die Liefermenge muss größer als 0 sein")
+	}
+	if value > MaxQuantity {
+		return 0, fmt.Errorf("Die Liefermenge darf %.0f nicht überschreiten", MaxQuantity)
 	}
 	return value, nil
 }

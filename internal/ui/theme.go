@@ -45,14 +45,14 @@ var ui = designTokens{
 	contentWidth:   1000,
 	formColWidth:   460,
 	resultColWidth: 520,
-	colHeight:      680,
+	colHeight:      570,
 }
 
 var appPalette = palette{
 	background:     color.NRGBA{R: 0xf4, G: 0xf1, B: 0xe8, A: 255},
 	railBackground: color.NRGBA{R: 0xf4, G: 0xf1, B: 0xe8, A: 255},
 	surface:        color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 255},
-	resultSurface:  color.NRGBA{R: 0xe1, G: 0xf7, B: 0x7b, A: 255},
+	resultSurface:  color.NRGBA{R: 0xd9, G: 0xee, B: 0x8a, A: 255},
 	border:         color.NRGBA{R: 0xd4, G: 0xd1, B: 0xc8, A: 255},
 	textPrimary:    color.NRGBA{R: 0x18, G: 0x21, B: 0x3d, A: 255},
 	textSecondary:  color.NRGBA{R: 0x61, G: 0x66, B: 0x73, A: 255},
@@ -87,9 +87,9 @@ func (themeOverride emissionTheme) Color(name fyne.ThemeColorName, variant fyne.
 	case theme.ColorNameBackground:
 		return appPalette.background
 	case theme.ColorNameInputBackground:
-		return appPalette.background
+		return appPalette.surface
 	case theme.ColorNameInputBorder:
-		return color.Transparent
+		return appPalette.border
 	case theme.ColorNameButton:
 		return appPalette.surface
 	case theme.ColorNameDisabledButton:
@@ -109,7 +109,7 @@ func (themeOverride emissionTheme) Size(name fyne.ThemeSizeName) float32 {
 	case theme.SizeNameText:
 		return 20
 	case theme.SizeNameInputBorder:
-		return 0
+		return 1
 	}
 	return themeOverride.Theme.Size(name)
 }

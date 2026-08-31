@@ -5,6 +5,7 @@ import (
 	"emissioncalculator/internal/validation"
 	"strconv"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -13,6 +14,7 @@ import (
 )
 
 const co2PricePreferenceKey = "calculation.co2_price_per_tonne"
+const factorYearPreferenceKey = "calculation.factor_year"
 
 type settingsStore struct {
 	preferences fyne.Preferences
@@ -22,15 +24,20 @@ type settingsStore struct {
 func newSettingsStore(preferences fyne.Preferences) *settingsStore {
 	defaults := calculation.DefaultConfig()
 	price := defaults.CO2PricePerTonne
+	year := defaults.Year
 	if preferences != nil {
 		price = preferences.FloatWithFallback(co2PricePreferenceKey, price)
+		year = preferences.IntWithFallback(factorYearPreferenceKey, year)
 	}
 	if price <= 0 {
 		price = defaults.CO2PricePerTonne
 	}
+	if !isAvailableYear(year) {
+		year = defaults.Year
+	}
 	return &settingsStore{
 		preferences: preferences,
-		config:      calculation.Config{CO2PricePerTonne: price},
+		config:      calculation.Config{CO2PricePerTonne: price, Year: year},
 	}
 }
 
@@ -45,17 +52,36 @@ func (store *settingsStore) SetCO2Price(price float64) {
 	}
 }
 
+func (store *settingsStore) SetFactorYear(year int) {
+	store.config.Year = year
+	if store.preferences != nil {
+		store.preferences.SetInt(factorYearPreferenceKey, year)
+	}
+}
+
 func (store *settingsStore) Reset() {
 	store.config = calculation.DefaultConfig()
 	if store.preferences != nil {
 		store.preferences.RemoveValue(co2PricePreferenceKey)
+		store.preferences.RemoveValue(factorYearPreferenceKey)
 	}
+}
+
+func isAvailableYear(year int) bool {
+	for _, available := range calculation.AvailableYears() {
+		if available == year {
+			return true
+		}
+	}
+	return false
 }
 
 type settingsPanel struct {
 	store        *settingsStore
 	priceEntry   *focusEntry
 	priceControl *quantityControl
+	yearSelect   *widget.Select
+	factorHint   *canvas.Text
 	status       *canvas.Text
 	content      fyne.CanvasObject
 	popup        *widget.PopUp
@@ -77,8 +103,20 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 	panel.priceEntry.SetText(formatSettingsValue(store.Config().CO2PricePerTonne))
 	panel.priceControl = newQuantityControl(panel.priceEntry, "€/t")
 	panel.status = canvasText(" ", 12, appPalette.textSecondary, true)
+	panel.factorHint = canvasText(factorHintText(store.Config().Year), 11, appPalette.textMuted, false)
 
-	iconBackground := canvas.NewCircle(appPalette.accentSoft)
+	yearOptions := yearSelectOptions()
+	panel.yearSelect = widget.NewSelect(yearOptions, func(selected string) {
+		panel.resetDefault = false
+		if year, err := strconv.Atoi(selected); err == nil {
+			panel.factorHint.Text = factorHintText(year)
+			panel.factorHint.Refresh()
+		}
+	})
+	panel.yearSelect.SetSelected(strconv.Itoa(store.Config().Year))
+	yearField := container.NewGridWrap(fyne.NewSize(ui.formColWidth, 42), panel.yearSelect)
+
+	iconBackground := canvas.NewCircle(appPalette.resultSurface)
 	icon := canvas.NewImageFromResource(settingsIconResource())
 	icon.FillMode = canvas.ImageFillContain
 	iconFrame := container.NewGridWrap(
@@ -103,8 +141,8 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 	applyButton.Importance = widget.HighImportance
 	actions := container.NewVBox(
 		container.NewHBox(resetButton),
-		verticalGap(10),
-		container.NewBorder(nil, nil, nil, container.NewHBox(cancelButton, applyButton), nil),
+		verticalGap(12),
+		container.NewBorder(nil, nil, cancelButton, applyButton, nil),
 	)
 
 	separatorTop := canvas.NewRectangle(appPalette.border)
@@ -113,21 +151,25 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 	separatorBottom.SetMinSize(fyne.NewSize(1, 1))
 	form := container.NewVBox(
 		header,
-		verticalGap(20),
+		verticalGap(14),
 		description,
-		verticalGap(24),
+		verticalGap(16),
 		separatorTop,
-		verticalGap(22),
+		verticalGap(14),
 		canvasText("C O₂ - P R E I S", 12, appPalette.textSecondary, true),
 		verticalGap(10),
 		panel.priceControl.content,
+		verticalGap(16),
+		canvasText("F A K T O R J A H R", 12, appPalette.textSecondary, true),
 		verticalGap(10),
-		canvasText("Dieser Wert gilt für Heizöl und Briketts.", 12, appPalette.textSecondary, false),
+		yearField,
+		verticalGap(10),
+		panel.factorHint,
 		verticalGap(8),
 		container.NewGridWrap(fyne.NewSize(ui.formColWidth, 20), panel.status),
-		verticalGap(18),
+		verticalGap(12),
 		separatorBottom,
-		verticalGap(18),
+		verticalGap(12),
 		actions,
 	)
 
@@ -135,8 +177,8 @@ func newSettingsPanel(store *settingsStore, onSaved func()) *settingsPanel {
 	background.CornerRadius = 28
 	background.StrokeColor = appPalette.border
 	background.StrokeWidth = 1
-	inset := container.NewBorder(verticalGap(32), verticalGap(28), horizontalGap(34), horizontalGap(34), form)
-	panel.content = container.NewGridWrap(fyne.NewSize(548, 548), container.NewStack(background, inset))
+	inset := container.NewBorder(verticalGap(28), verticalGap(24), horizontalGap(30), horizontalGap(30), form)
+	panel.content = container.NewGridWrap(fyne.NewSize(540, 590), container.NewStack(background, inset))
 	panel.priceEntry.OnSubmitted = func(string) { panel.apply() }
 	panel.priceEntry.OnChanged = func(string) {
 		panel.resetDefault = false
@@ -153,20 +195,28 @@ func (panel *settingsPanel) apply() {
 		setStatus(panel.status, "Bitte einen gültigen CO₂-Preis eingeben.", appPalette.error)
 		return
 	}
-	if panel.resetDefault && price == calculation.DefaultConfig().CO2PricePerTonne {
+	year, err := strconv.Atoi(panel.yearSelect.Selected)
+	if err != nil {
+		setStatus(panel.status, "Bitte ein gültiges Faktorjahr wählen.", appPalette.error)
+		return
+	}
+	defaults := calculation.DefaultConfig()
+	if panel.resetDefault && price == defaults.CO2PricePerTonne && year == defaults.Year {
 		panel.store.Reset()
 	} else {
 		panel.store.SetCO2Price(price)
+		panel.store.SetFactorYear(year)
 	}
+	panel.dismiss()
 	if panel.onSaved != nil {
 		panel.onSaved()
 	}
-	panel.dismiss()
 }
 
 func (panel *settingsPanel) restoreDefault() {
-	defaultPrice := calculation.DefaultConfig().CO2PricePerTonne
-	panel.priceEntry.SetText(formatSettingsValue(defaultPrice))
+	defaults := calculation.DefaultConfig()
+	panel.priceEntry.SetText(formatSettingsValue(defaults.CO2PricePerTonne))
+	panel.yearSelect.SetSelected(strconv.Itoa(defaults.Year))
 	panel.resetDefault = true
 	setStatus(panel.status, "Standardwert eingesetzt – mit Übernehmen speichern.", appPalette.success)
 }
@@ -182,4 +232,24 @@ func formatSettingsValue(value float64) string {
 	formatted = strings.TrimRight(formatted, "0")
 	formatted = strings.TrimRight(formatted, ".")
 	return strings.ReplaceAll(formatted, ".", ",")
+}
+
+func yearSelectOptions() []string {
+	years := calculation.AvailableYears()
+	options := make([]string, len(years))
+	for i, year := range years {
+		options[i] = strconv.Itoa(year)
+	}
+	return options
+}
+
+// factorHintText shows the emission factors that actually apply for the given year.
+func factorHintText(year int) string {
+	asOf := time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
+	oil, oilErr := calculation.FactorFor(calculation.FuelOil, asOf)
+	briquettes, briquettesErr := calculation.FactorFor(calculation.FuelBriquettes, asOf)
+	if oilErr != nil || briquettesErr != nil {
+		return "Für dieses Jahr sind keine Faktoren hinterlegt."
+	}
+	return "Heizöl: EF " + formatFloat(oil.EmissionFactor, 4) + " · Briketts: EF " + formatFloat(briquettes.EmissionFactor, 4) + " kg CO₂/MJ"
 }
