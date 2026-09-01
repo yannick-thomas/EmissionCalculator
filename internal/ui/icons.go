@@ -70,11 +70,8 @@ func settingsIconResource() fyne.Resource {
 }
 
 func resultPanelResource(active bool) fyne.Resource {
-	fill := "#EDEEE7"
-	if active {
-		fill = "#D9EE8A"
-	}
-	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520"><rect width="990" height="510" rx="26" fill="%s"/></svg>`, fill)
+	fill := "#FFFFFF"
+	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520"><rect width="990" height="510" rx="6" fill="%s"/></svg>`, fill)
 	return fyne.NewStaticResource(fmt.Sprintf("result-%t.svg", active), []byte(svg))
 }
 

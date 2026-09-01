@@ -12,7 +12,7 @@ const (
 	pageMinWidth   = float32(500)
 	pageInset      = float32(20)
 	pageGap        = float32(24)
-	headerHeight   = float32(126)
+	headerHeight   = float32(72)
 )
 
 // responsivePage switches the calculator from two columns to a vertical flow when
@@ -54,9 +54,9 @@ func (page *responsivePage) desiredHeight(width float32) float32 {
 	formHeight := fyne.Max(page.form.MinSize().Height, ui.colHeight)
 	resultHeight := fyne.Max(page.result.MinSize().Height, ui.colHeight)
 	if width >= pageBreakpoint {
-		return headerHeight + 36 + fyne.Max(formHeight, resultHeight) + 36
+		return headerHeight + 28 + fyne.Max(formHeight, resultHeight) + 28
 	}
-	return headerHeight + pageGap + formHeight + pageGap + resultHeight + 36
+	return headerHeight + pageGap + formHeight + pageGap + resultHeight + 28
 }
 
 type responsivePageRenderer struct {
@@ -74,7 +74,7 @@ func (renderer *responsivePageRenderer) Layout(size fyne.Size) {
 
 	formHeight := fyne.Max(page.form.MinSize().Height, ui.colHeight)
 	resultHeight := fyne.Max(page.result.MinSize().Height, ui.colHeight)
-	y := headerHeight + 36
+	y := headerHeight + 28
 	if size.Width >= pageBreakpoint {
 		formWidth := (contentWidth - pageGap) * 0.45
 		resultWidth := contentWidth - pageGap - formWidth
@@ -121,23 +121,23 @@ func (layout *responsiveNavigationLayout) Layout(objects []fyne.CanvasObject, si
 	}
 	logo, fuels, tools := objects[0], objects[1], objects[2]
 	if size.Width >= pageBreakpoint {
-		logo.Move(fyne.NewPos(0, (size.Height-64)/2))
-		logo.Resize(fyne.NewSize(64, 64))
+		logo.Move(fyne.NewPos(0, (size.Height-44)/2))
+		logo.Resize(fyne.NewSize(44, 44))
 		toolsWidth := fyne.Max(tools.MinSize().Width, 140)
-		tools.Move(fyne.NewPos(size.Width-toolsWidth, (size.Height-62)/2))
-		tools.Resize(fyne.NewSize(toolsWidth, 62))
-		fuels.Move(fyne.NewPos(80, (size.Height-62)/2))
-		fuels.Resize(fyne.NewSize(size.Width-toolsWidth-96, 62))
+		tools.Move(fyne.NewPos(size.Width-toolsWidth, (size.Height-44)/2))
+		tools.Resize(fyne.NewSize(toolsWidth, 44))
+		fuels.Move(fyne.NewPos(56, (size.Height-44)/2))
+		fuels.Resize(fyne.NewSize(size.Width-toolsWidth-68, 44))
 		return
 	}
 
 	logo.Move(fyne.NewPos(0, 4))
-	logo.Resize(fyne.NewSize(64, 64))
+	logo.Resize(fyne.NewSize(44, 44))
 	toolsWidth := fyne.Min(size.Width-80, fyne.Max(tools.MinSize().Width, 140))
 	tools.Move(fyne.NewPos(size.Width-toolsWidth, 5))
-	tools.Resize(fyne.NewSize(toolsWidth, 62))
-	fuels.Move(fyne.NewPos(0, 70))
-	fuels.Resize(fyne.NewSize(size.Width, size.Height-74))
+	tools.Resize(fyne.NewSize(toolsWidth, 44))
+	fuels.Move(fyne.NewPos(0, 52))
+	fuels.Resize(fyne.NewSize(size.Width, fyne.Max(1, size.Height-52)))
 }
 
 func (layout *responsiveHeaderLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {

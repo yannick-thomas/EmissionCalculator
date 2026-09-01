@@ -72,20 +72,26 @@ func NewRootWindow(app fyne.App) fyne.Window {
 	window.Resize(fyne.NewSize(1240, 900))
 	window.CenterOnScreen()
 	settings := newSettingsStore(app.Preferences())
+	fuelMenu := newFuelMenuStore(app.Preferences())
 	historyController := newHistoryController()
-	views := make([]*referenceView, 0, len(calculation.Catalog))
-	objects := make([]fyne.CanvasObject, 0, len(calculation.Catalog))
-	for index, descriptor := range calculation.Catalog {
-		view := buildReferenceViewWithConfig(window, string(descriptor.Fuel), settings.Config)
-		view.saveHistory = historyController.Save
-		if index > 0 {
-			view.content.Hide()
+	var buildContent func()
+	buildContent = func() {
+		descriptors := fuelMenu.enabledDescriptors()
+		views := make([]*referenceView, 0, len(descriptors))
+		objects := make([]fyne.CanvasObject, 0, len(descriptors))
+		for index, descriptor := range descriptors {
+			view := buildReferenceViewWithConfig(window, string(descriptor.Fuel), settings.Config)
+			view.saveHistory = historyController.Save
+			if index > 0 {
+				view.content.Hide()
+			}
+			views = append(views, view)
+			objects = append(objects, view.content)
 		}
-		views = append(views, view)
-		objects = append(objects, view.content)
+		navigation := buildSharedNavigation(window, settings, historyController, fuelMenu, views, buildContent)
+		window.SetContent(container.NewBorder(navigation, nil, nil, nil, container.NewStack(objects...)))
 	}
-	navigation := buildSharedNavigation(window, settings, historyController, views)
-	window.SetContent(container.NewBorder(navigation, nil, nil, nil, container.NewStack(objects...)))
+	buildContent()
 	return window
 }
 

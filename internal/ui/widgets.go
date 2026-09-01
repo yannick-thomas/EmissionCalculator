@@ -78,14 +78,11 @@ func (button *actionButton) TypedKey(event *fyne.KeyEvent) {
 func (button *actionButton) CreateRenderer() fyne.WidgetRenderer {
 	renderer := &actionButtonRenderer{
 		button:     button,
-		background: canvas.NewRectangle(appPalette.textPrimary),
+		background: canvas.NewRectangle(appPalette.accent),
 		label:      canvasText(button.text, 17, appPalette.white, true),
-		arrowDisk:  canvas.NewCircle(appPalette.resultSurface),
-		arrow:      canvas.NewImageFromResource(arrowIconResource()),
 	}
-	renderer.background.CornerRadius = 34
-	renderer.arrow.FillMode = canvas.ImageFillContain
-	renderer.objects = []fyne.CanvasObject{renderer.background, renderer.label, renderer.arrowDisk, renderer.arrow}
+	renderer.background.CornerRadius = 6
+	renderer.objects = []fyne.CanvasObject{renderer.background, renderer.label}
 	renderer.Refresh()
 	return renderer
 }
@@ -104,16 +101,12 @@ func (renderer *actionButtonRenderer) Layout(size fyne.Size) {
 	labelSize := renderer.label.MinSize()
 	renderer.label.Move(fyne.NewPos(28, (size.Height-labelSize.Height)/2))
 	renderer.label.Resize(labelSize)
-	renderer.arrowDisk.Move(fyne.NewPos(size.Width-58, (size.Height-42)/2))
-	renderer.arrowDisk.Resize(fyne.NewSize(42, 42))
-	renderer.arrow.Move(fyne.NewPos(size.Width-48, (size.Height-22)/2))
-	renderer.arrow.Resize(fyne.NewSize(22, 22))
 }
 
-func (renderer *actionButtonRenderer) MinSize() fyne.Size { return fyne.NewSize(248, 68) }
+func (renderer *actionButtonRenderer) MinSize() fyne.Size { return fyne.NewSize(190, 44) }
 
 func (renderer *actionButtonRenderer) Refresh() {
-	fill := appPalette.textPrimary
+	fill := appPalette.accent
 	if renderer.button.hovered {
 		fill = appPalette.accent
 	}
@@ -122,7 +115,7 @@ func (renderer *actionButtonRenderer) Refresh() {
 	}
 	renderer.background.FillColor = fill
 	if renderer.button.focused {
-		renderer.background.StrokeColor = appPalette.resultSurface
+		renderer.background.StrokeColor = appPalette.textPrimary
 		renderer.background.StrokeWidth = 2
 	} else {
 		renderer.background.StrokeColor = color.Transparent
@@ -210,7 +203,7 @@ func (button *fuelNavigationButton) CreateRenderer() fyne.WidgetRenderer {
 		icon:       canvas.NewImageFromResource(navigationIconResource(button.iconKind, button.active, false)),
 		label:      canvasText(button.label, 16, appPalette.textSecondary, true),
 	}
-	renderer.background.CornerRadius = 18
+	renderer.background.CornerRadius = 6
 	renderer.icon.FillMode = canvas.ImageFillContain
 	renderer.objects = []fyne.CanvasObject{renderer.background, renderer.icon, renderer.label}
 	renderer.Refresh()
@@ -227,14 +220,14 @@ type fuelNavigationRenderer struct {
 
 func (renderer *fuelNavigationRenderer) Layout(size fyne.Size) {
 	renderer.background.Resize(size)
-	renderer.icon.Move(fyne.NewPos(20, (size.Height-24)/2))
-	renderer.icon.Resize(fyne.NewSize(24, 24))
+	renderer.icon.Move(fyne.NewPos(12, (size.Height-20)/2))
+	renderer.icon.Resize(fyne.NewSize(20, 20))
 	labelSize := renderer.label.MinSize()
-	renderer.label.Move(fyne.NewPos(54, (size.Height-labelSize.Height)/2))
+	renderer.label.Move(fyne.NewPos(40, (size.Height-labelSize.Height)/2))
 	renderer.label.Resize(labelSize)
 }
 
-func (renderer *fuelNavigationRenderer) MinSize() fyne.Size { return fyne.NewSize(136, 62) }
+func (renderer *fuelNavigationRenderer) MinSize() fyne.Size { return fyne.NewSize(124, 44) }
 
 func (renderer *fuelNavigationRenderer) Refresh() {
 	background := color.Color(color.Transparent)
@@ -346,7 +339,8 @@ func (button *circleIconButton) Enable() {
 func (button *circleIconButton) Disabled() bool { return button.disabled }
 
 func (button *circleIconButton) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewCircle(color.Transparent)
+	background := canvas.NewRectangle(color.Transparent)
+	background.CornerRadius = 6
 	background.StrokeColor = appPalette.border
 	background.StrokeWidth = 1
 	icon := canvas.NewImageFromResource(button.icon)
@@ -359,7 +353,7 @@ func (button *circleIconButton) CreateRenderer() fyne.WidgetRenderer {
 
 type circleIconButtonRenderer struct {
 	button     *circleIconButton
-	background *canvas.Circle
+	background *canvas.Rectangle
 	icon       *canvas.Image
 	objects    []fyne.CanvasObject
 }
@@ -370,7 +364,7 @@ func (renderer *circleIconButtonRenderer) Layout(size fyne.Size) {
 	renderer.icon.Resize(fyne.NewSize(24, 24))
 }
 
-func (renderer *circleIconButtonRenderer) MinSize() fyne.Size { return fyne.NewSize(54, 54) }
+func (renderer *circleIconButtonRenderer) MinSize() fyne.Size { return fyne.NewSize(42, 42) }
 
 func (renderer *circleIconButtonRenderer) Refresh() {
 	fill := color.Color(color.Transparent)

@@ -39,17 +39,17 @@ type palette struct {
 }
 
 var ui = designTokens{
-	topBarHeight: 128,
+	topBarHeight: 96,
 	formColWidth: 460,
-	colHeight:    570,
+	colHeight:    500,
 }
 
 var appPalette = palette{
-	background:     color.NRGBA{R: 0xf4, G: 0xf1, B: 0xe8, A: 255},
-	railBackground: color.NRGBA{R: 0xf4, G: 0xf1, B: 0xe8, A: 255},
+	background:     color.NRGBA{R: 0xf7, G: 0xf8, B: 0xf6, A: 255},
+	railBackground: color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 255},
 	surface:        color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 255},
-	resultSurface:  color.NRGBA{R: 0xd9, G: 0xee, B: 0x8a, A: 255},
-	border:         color.NRGBA{R: 0xd4, G: 0xd1, B: 0xc8, A: 255},
+	resultSurface:  color.NRGBA{R: 0xed, G: 0xf5, B: 0xc8, A: 255},
+	border:         color.NRGBA{R: 0xd8, G: 0xdc, B: 0xd8, A: 255},
 	textPrimary:    color.NRGBA{R: 0x18, G: 0x21, B: 0x3d, A: 255},
 	textSecondary:  color.NRGBA{R: 0x61, G: 0x66, B: 0x73, A: 255},
 	textMuted:      color.NRGBA{R: 0x82, G: 0x86, B: 0x90, A: 255},

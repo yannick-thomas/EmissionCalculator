@@ -48,6 +48,9 @@ func TestResponsiveNavigationUsesSecondRowWhenCompact(t *testing.T) {
 	if fuels.Position().Y <= logo.Position().Y || tools.Position().Y != 5 {
 		t.Fatalf("expected compact two-row navigation: logo=%v fuels=%v tools=%v", logo.Position(), fuels.Position(), tools.Position())
 	}
+	if fuels.Size().Height < 44 || tools.Size().Height != 44 {
+		t.Fatalf("expected compact navigation controls to remain fully visible: fuels=%v tools=%v", fuels.Size(), tools.Size())
+	}
 	layout.Layout(objects, fyne.NewSize(1200, ui.topBarHeight))
 	if fuels.Position().Y != tools.Position().Y {
 		t.Fatalf("expected one-row desktop navigation: fuels=%v tools=%v", fuels.Position(), tools.Position())
