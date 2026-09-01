@@ -106,6 +106,9 @@ func TestReferenceViewShowsAndClearsValidationState(t *testing.T) {
 	view := buildReferenceView(window, modeOil)
 
 	view.quantityEntry.SetText("ungültig")
+	if view.quantityControl.invalid || view.headerStatus.Text != "Bereit" {
+		t.Fatal("expected validation to wait until the user submits the input")
+	}
 	test.Tap(view.calculateButton)
 	if !view.quantityControl.invalid || view.headerStatus.Text != "Eingabe prüfen" {
 		t.Fatal("expected invalid input to update field and header state")
@@ -154,10 +157,10 @@ func TestFormatQuantityDisplay(t *testing.T) {
 }
 
 func TestResultTextSizeAdaptsToLongValues(t *testing.T) {
-	if resultTextSize("33.036,05") != 72 {
+	if resultTextSize("33.036,05") != 60 {
 		t.Fatal("expected regular result size")
 	}
-	if resultTextSize("1.234.567,89") >= 72 {
+	if resultTextSize("1.234.567,89") >= 60 {
 		t.Fatal("expected long result to use a smaller size")
 	}
 }

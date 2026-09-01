@@ -44,13 +44,13 @@ func setStatus(status *canvas.Text, message string, colorValue color.Color) {
 }
 
 func detailValue(value string) *canvas.Text {
-	return canvasText(value, 18, appPalette.textPrimary, true)
+	return canvasText(value, 17, appPalette.textPrimary, true)
 }
 
 func resultMetric(label string, value *canvas.Text) fyne.CanvasObject {
 	return container.NewVBox(
 		canvasText(label, 13, appPalette.textSecondary, false),
-		verticalGap(16),
+		verticalGap(12),
 		value,
 	)
 }
@@ -58,11 +58,11 @@ func resultMetric(label string, value *canvas.Text) fyne.CanvasObject {
 func resultTextSize(value string) float32 {
 	switch {
 	case len(value) <= 10:
-		return 72
+		return 60
 	case len(value) <= 13:
-		return 54
+		return 50
 	default:
-		return 44
+		return 40
 	}
 }
 

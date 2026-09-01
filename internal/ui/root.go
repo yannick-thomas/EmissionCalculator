@@ -69,7 +69,7 @@ type referenceView struct {
 func NewRootWindow(app fyne.App) fyne.Window {
 	app.Settings().SetTheme(emissionTheme{Theme: theme.LightTheme()})
 	window := app.NewWindow("Emissionsrechner")
-	window.Resize(fyne.NewSize(1240, 900))
+	window.Resize(fyne.NewSize(1180, 900))
 	window.CenterOnScreen()
 	settings := newSettingsStore(app.Preferences())
 	fuelMenu := newFuelMenuStore(app.Preferences())

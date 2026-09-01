@@ -13,8 +13,8 @@ import (
 func buildSharedNavigation(window fyne.Window, settings *settingsStore, history *historyController, fuelMenu *fuelMenuStore, views []*referenceView, onFuelAdded func()) fyne.CanvasObject {
 	logoBackground := canvas.NewImageFromResource(logoPanelResource())
 	logoBackground.FillMode = canvas.ImageFillStretch
-	logoText := canvasText("e°", 22, appPalette.textPrimary, true)
-	logo := container.NewGridWrap(fyne.NewSize(44, 44), container.NewStack(logoBackground, container.NewCenter(logoText)))
+	logoText := canvasText("e°", 20, appPalette.textPrimary, true)
+	logo := container.NewGridWrap(fyne.NewSize(40, 40), container.NewStack(logoBackground, container.NewCenter(logoText)))
 	buttons := make([]*fuelNavigationButton, len(views))
 	for index, view := range views {
 		descriptor, _ := calculation.FuelByType(calculation.FuelType(view.mode))
@@ -38,8 +38,6 @@ func buildSharedNavigation(window fyne.Window, settings *settingsStore, history 
 			}
 		})
 	})
-	navigationDivider := canvas.NewRectangle(appPalette.border)
-	navigationDivider.SetMinSize(fyne.NewSize(1, 34))
 	fuelObjects := make([]fyne.CanvasObject, 0, len(buttons)*2)
 	for index, button := range buttons {
 		if index > 0 {
@@ -47,21 +45,19 @@ func buildSharedNavigation(window fyne.Window, settings *settingsStore, history 
 		}
 		fuelObjects = append(fuelObjects, container.NewGridWrap(fyne.NewSize(124, 44), button))
 	}
-	addFuelButton := widget.NewButton("+", func() {
+	addFuelButton := newCircleIconButton(plusIconResource(), func() {
 		showAddFuelDialog(window, fuelMenu, onFuelAdded)
 	})
 	if len(fuelMenu.availableDescriptors()) == 0 {
 		addFuelButton.Disable()
 	}
-	fuelObjects = append(fuelObjects, horizontalGap(6), container.NewGridWrap(fyne.NewSize(44, 44), addFuelButton))
+	fuelObjects = append(fuelObjects, horizontalGap(6), container.NewGridWrap(fyne.NewSize(38, 38), addFuelButton))
 	fuelsScroll := container.NewHScroll(container.NewHBox(fuelObjects...))
 	historyButton := newCircleIconButton(historyIconResource(), func() { showHistoryDialog(window, history) })
 	toolActions := container.NewHBox(
-		container.NewGridWrap(fyne.NewSize(42, 42), historyButton),
-		horizontalGap(8),
-		container.NewCenter(navigationDivider),
-		horizontalGap(8),
-		container.NewGridWrap(fyne.NewSize(42, 42), settingsButton),
+		container.NewGridWrap(fyne.NewSize(38, 38), historyButton),
+		horizontalGap(6),
+		container.NewGridWrap(fyne.NewSize(38, 38), settingsButton),
 	)
 	barContent := container.New(&responsiveNavigationLayout{}, logo, fuelsScroll, toolActions)
 	background := canvas.NewRectangle(appPalette.railBackground)

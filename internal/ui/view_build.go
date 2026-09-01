@@ -20,15 +20,15 @@ func buildReferenceViewWithConfig(window fyne.Window, mode string, configProvide
 	view.quantityEntry.SetPlaceHolder("z. B. 12500 oder 12,5")
 	view.status = newStatusText()
 
-	view.resultValue = canvasText("—", 72, appPalette.textPrimary, true)
-	view.resultUnit = canvasText("", 23, appPalette.textPrimary, true)
-	view.resultHint = canvasText("Noch keine Berechnung", 16, appPalette.textSecondary, false)
+	view.resultValue = canvasText("—", 60, appPalette.textPrimary, true)
+	view.resultUnit = canvasText("", 20, appPalette.textPrimary, true)
+	view.resultHint = canvasText("Ergebnis erscheint nach der Berechnung", 15, appPalette.textSecondary, false)
 	view.costValue = detailValue("—")
 	view.energyValue = detailValue("—")
 	view.co2Value = detailValue("—")
 	view.resultBasis = newCalculationBasis()
 
-	view.calculateButton = newActionButton("Jetzt berechnen", view.calculate)
+	view.calculateButton = newActionButton("Berechnen", view.calculate)
 	view.printButton = newCircleIconButton(printIconResource(), view.print)
 	view.printButton.Disable()
 	view.saveButton = newCircleIconButton(saveIconResource(), view.saveAs)
@@ -42,9 +42,21 @@ func buildReferenceViewWithConfig(window fyne.Window, mode string, configProvide
 	view.quantityEntry.OnSubmitted = func(string) { view.calculate() }
 	view.quantityEntry.OnChanged = func(string) {
 		if _, err := validation.ParseQuantity(view.quantityEntry.Text); err != nil {
-			view.quantityControl.SetError(true)
-			setStatus(view.status, err.Error(), appPalette.error)
-			view.markResultStale(resultStateInvalid, "Eingabe prüfen", appPalette.error)
+			// Do not punish incomplete input while the user is still typing. Once a
+			// submission failed, keep the validation visible until it is corrected.
+			if view.state == resultStateInvalid {
+				view.quantityControl.SetError(true)
+				setStatus(view.status, err.Error(), appPalette.error)
+				view.setHeaderStatus("Eingabe prüfen", appPalette.error)
+				return
+			}
+			view.quantityControl.SetError(false)
+			setStatus(view.status, " ", appPalette.textSecondary)
+			if view.result.Valid {
+				view.markResultStale(resultStateStale, "Eingabe geändert – neu berechnen", appPalette.accent)
+				return
+			}
+			view.setHeaderStatus("Bereit", appPalette.success)
 			return
 		}
 		view.quantityControl.SetError(false)
@@ -69,12 +81,11 @@ func buildAppShell(view *referenceView) fyne.CanvasObject {
 }
 
 func buildHeader(view *referenceView) fyne.CanvasObject {
-	brandGroup := canvasText("Emissionsrechner", 18, appPalette.textPrimary, true)
+	brandGroup := canvasText("Emissionsrechner", 16, appPalette.textPrimary, true)
 
 	view.headerStatusDot = canvas.NewCircle(appPalette.success)
-	statusHalo := canvas.NewCircle(color.NRGBA{R: 0x83, G: 0xa8, B: 0x31, A: 30})
-	readyIndicator := container.NewGridWrap(fyne.NewSize(24, 24), container.NewStack(statusHalo, container.NewPadded(view.headerStatusDot)))
-	view.headerStatus = canvasText("Bereit", 16, appPalette.textSecondary, true)
+	readyIndicator := container.NewGridWrap(fyne.NewSize(14, 14), container.NewPadded(view.headerStatusDot))
+	view.headerStatus = canvasText("Bereit", 14, appPalette.textSecondary, false)
 	statusGroup := container.NewCenter(container.NewHBox(readyIndicator, view.headerStatus))
 	separator := canvas.NewRectangle(appPalette.border)
 	separator.SetMinSize(fyne.NewSize(1, 1))
@@ -85,10 +96,12 @@ func buildForm(view *referenceView) fyne.CanvasObject {
 	view.quantityControl = newQuantityControl(view.quantityEntry, unitForMode(view.mode))
 	statusFrame := container.NewGridWrap(fyne.NewSize(ui.formColWidth, 20), view.status)
 	return container.NewVBox(
-		canvasText("Liefermenge", 28, appPalette.textPrimary, true),
+		canvasText(titleForMode(view.mode), 13, appPalette.textSecondary, false),
+		verticalGap(10),
+		canvasText("Liefermenge", 30, appPalette.textPrimary, true),
 		verticalGap(8),
-		canvasText(titleForMode(view.mode), 16, appPalette.textSecondary, false),
-		verticalGap(28),
+		canvasText("Menge eingeben und Ergebnis nachvollziehen.", 14, appPalette.textSecondary, false),
+		verticalGap(30),
 		canvasText("Menge", 14, appPalette.textPrimary, true),
 		verticalGap(12),
 		view.quantityControl.content,
@@ -96,20 +109,20 @@ func buildForm(view *referenceView) fyne.CanvasObject {
 		canvasText("Beispiel: 1.250 oder 1250,5", 14, appPalette.textSecondary, false),
 		verticalGap(8),
 		statusFrame,
-		verticalGap(16),
+		verticalGap(14),
 		container.NewHBox(view.calculateButton),
 	)
 }
 
 func buildResultCard(view *referenceView) fyne.CanvasObject {
-	label := canvasText("Gesamtemissionen", 14, appPalette.textSecondary, true)
-	view.resultBadge = canvasText("", 14, color.Transparent, true)
+	label := canvasText("Gesamtemissionen", 13, appPalette.textSecondary, true)
+	view.resultBadge = canvasText("", 12, color.Transparent, true)
 	view.resultBadgeBackground = canvas.NewRectangle(color.Transparent)
-	view.resultBadgeBackground.CornerRadius = 22
+	view.resultBadgeBackground.CornerRadius = 16
 	view.resultBadgeBackground.StrokeColor = color.Transparent
 	view.resultBadgeBackground.StrokeWidth = 1
 	badge := container.NewGridWrap(
-		fyne.NewSize(136, 44),
+		fyne.NewSize(124, 32),
 		container.NewStack(view.resultBadgeBackground, container.NewCenter(view.resultBadge)),
 	)
 	metrics := container.NewGridWithColumns(3,
@@ -117,10 +130,8 @@ func buildResultCard(view *referenceView) fyne.CanvasObject {
 		resultMetric("Energiegehalt", view.energyValue),
 		resultMetric("Emissionsintensität", view.co2Value),
 	)
-	separator := canvas.NewRectangle(color.NRGBA{R: 0x18, G: 0x21, B: 0x3d, A: 36})
+	separator := canvas.NewRectangle(appPalette.border)
 	separator.SetMinSize(fyne.NewSize(1, 1))
-	resultAccent := canvas.NewRectangle(appPalette.resultSurface)
-	resultAccent.SetMinSize(fyne.NewSize(4, 1))
 	actions := container.NewGridWithColumns(2,
 		headerAction(view.traceButton, "Rechenweg"),
 		headerAction(view.scenarioButton, "Szenarien"),
@@ -130,28 +141,28 @@ func buildResultCard(view *referenceView) fyne.CanvasObject {
 	view.resultValueRow = container.NewVBox(view.resultValue, view.resultUnit)
 	cardContent := container.NewVBox(
 		container.NewBorder(nil, nil, label, badge, nil),
-		verticalGap(24),
+		verticalGap(20),
 		view.resultValueRow,
 		verticalGap(10),
 		view.resultHint,
-		verticalGap(20),
+		verticalGap(18),
 		separator,
 		verticalGap(16),
 		metrics,
-		verticalGap(18),
+		verticalGap(16),
 		canvasText("Berechnungsgrundlage", 15, appPalette.textPrimary, true),
 		verticalGap(8),
 		view.resultBasis.content,
-		verticalGap(18),
+		verticalGap(14),
 		actions,
 	)
 
 	view.resultBackground = canvas.NewImageFromResource(resultPanelResource(false))
 	view.resultBackground.FillMode = canvas.ImageFillStretch
 	contentInset := container.NewBorder(verticalGap(26), verticalGap(26), horizontalGap(30), horizontalGap(30), cardContent)
-	return container.NewBorder(nil, nil, resultAccent, nil, container.NewStack(view.resultBackground, contentInset))
+	return container.NewStack(view.resultBackground, contentInset)
 }
 
 func headerAction(button *circleIconButton, label string) fyne.CanvasObject {
-	return container.NewGridWrap(fyne.NewSize(150, 42), container.NewBorder(nil, nil, button, nil, container.NewCenter(canvasText(label, 13, appPalette.textPrimary, false))))
+	return container.NewGridWrap(fyne.NewSize(145, 38), container.NewBorder(nil, nil, button, nil, container.NewCenter(canvasText(label, 13, appPalette.textPrimary, false))))
 }

@@ -8,11 +8,11 @@ import (
 
 const (
 	pageBreakpoint = float32(900)
-	pageMaxWidth   = float32(1160)
+	pageMaxWidth   = float32(1120)
 	pageMinWidth   = float32(500)
 	pageInset      = float32(20)
-	pageGap        = float32(24)
-	headerHeight   = float32(72)
+	pageGap        = float32(32)
+	headerHeight   = float32(64)
 )
 
 // responsivePage switches the calculator from two columns to a vertical flow when
@@ -54,7 +54,7 @@ func (page *responsivePage) desiredHeight(width float32) float32 {
 	formHeight := fyne.Max(page.form.MinSize().Height, ui.colHeight)
 	resultHeight := fyne.Max(page.result.MinSize().Height, ui.colHeight)
 	if width >= pageBreakpoint {
-		return headerHeight + 28 + fyne.Max(formHeight, resultHeight) + 28
+		return headerHeight + 32 + fyne.Max(formHeight, resultHeight) + 28
 	}
 	return headerHeight + pageGap + formHeight + pageGap + resultHeight + 28
 }
@@ -74,9 +74,9 @@ func (renderer *responsivePageRenderer) Layout(size fyne.Size) {
 
 	formHeight := fyne.Max(page.form.MinSize().Height, ui.colHeight)
 	resultHeight := fyne.Max(page.result.MinSize().Height, ui.colHeight)
-	y := headerHeight + 28
+	y := headerHeight + 32
 	if size.Width >= pageBreakpoint {
-		formWidth := (contentWidth - pageGap) * 0.45
+		formWidth := (contentWidth - pageGap) * 0.42
 		resultWidth := contentWidth - pageGap - formWidth
 		page.form.Move(fyne.NewPos(left, y))
 		page.form.Resize(fyne.NewSize(formWidth, formHeight))

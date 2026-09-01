@@ -99,9 +99,9 @@ func (view *referenceView) clearResult() {
 	view.result = models.CalculationRecord{}
 	view.state = resultStateInvalid
 	view.resultValue.Text = "—"
-	view.resultValue.TextSize = 72
+	view.resultValue.TextSize = 60
 	view.resultUnit.Text = ""
-	view.resultHint.Text = "Noch keine Berechnung"
+	view.resultHint.Text = "Ergebnis erscheint nach der Berechnung"
 	view.costValue.Text = "—"
 	view.energyValue.Text = "—"
 	view.co2Value.Text = "—"
